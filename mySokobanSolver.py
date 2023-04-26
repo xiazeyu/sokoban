@@ -29,6 +29,7 @@ Last modified by 2022-03-27  by f.maire@qut.edu.au
 # You have to make sure that your code works with 
 # the files provided (search.py and sokoban.py) as your code will be tested 
 # with these files
+import itertools
 import search 
 import sokoban
 
@@ -42,7 +43,7 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
-    return [ (11262141, 'Tian-Ching', 'Lan')]
+    return [ (11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia') ]
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,10 +74,70 @@ def taboo_cells(warehouse):
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
     '''
-    #warehouse.extract_locations(warehouse.__str__())
-    print(warehouse.walls)
     ##         "INSERT YOUR CODE HERE"    
-    returned = ''
+    exploded = []
+    corner = []
+    taboo = []
+    frontier = [warehouse.worker]
+    while frontier:
+        (currentX,currentY) = frontier[0]
+        exploded.append((currentX,currentY))
+        couldGo = [(currentX,currentY-1), (currentX,currentY+1),(currentX-1,currentY), (currentX+1,currentY)]
+        #up,down,left,right
+        sideToWall = 0
+        for (actionX,actionY) in couldGo:
+            touchWall = False
+            if (actionX,actionY) in frontier or (actionX,actionY) in exploded:
+                continue
+                #if already in frontier or exploded, remove to avoid loop
+            if (actionX,actionY) in warehouse.walls:
+                touchWall = True
+                sideToWall += 1
+                #check if walk to wall
+            else:
+                frontier.append((actionX,actionY))
+            #if not wall or expold    
+        if sideToWall >=2 and (currentX,currentY) not in warehouse.targets:
+            corner.append((currentX,currentY))
+            
+        frontier.remove((currentX,currentY))
+    taboo = corner
+    
+    for ((corner1X,corner1Y),(corner2X,corner2Y)) in itertools.combinations_with_replacement(corner,2):
+        #[((corner1X,corner1Y),(corner2X,corner2Y)), ((corner1X,corner1Y),(corner3X,corner3Y))]
+        if corner1X == corner2X:
+            isTaboo = True
+            for checkWallY in range(min(corner1Y,corner2Y)+1, max(corner1Y,corner2Y)) :
+                if (((corner1X+1,checkWallY) not in warehouse.walls and (corner1X-1,checkWallY) not in warehouse.walls)) or (corner1X,checkWallY) in warehouse.targets or (corner1X,checkWallY) in warehouse.boxes:
+                    isTaboo = False
+                    break
+            if isTaboo:
+                for checkWallY in range(min(corner1Y,corner2Y)+1, max(corner1Y,corner2Y)):
+                    taboo.append((corner1X,checkWallY))
+        elif  corner1Y == corner2Y:
+            isTaboo = True
+            for checkWallX in range(min(corner1X,corner2X)+1, max(corner1X,corner2X)) :
+                if ((checkWallX, corner1Y+1) not in warehouse.walls and (checkWallX,checkWallY-1) not in warehouse.walls) or (checkWallX,checkWallY+1) in warehouse.targets or (checkWallX,checkWallY) in warehouse.boxes:
+                    isTaboo = False
+                    break
+            if isTaboo:
+                for checkWallX in range(min(corner1X,corner2X)+1, max(corner1X,corner2X)):
+                    taboo.append((checkWallX,corner1X))
+    returned = warehouse.__str__()              
+    for (tabooX,tabooY) in taboo:
+        returned = returned[:(warehouse.ncols+1) * tabooY + tabooX] + 'X' + returned[(warehouse.ncols+1) * tabooY + tabooX + 1:]
+    returned = returned.replace("."," ")
+    returned = returned.replace("@"," ")
+    returned = returned.replace("$"," ")
+    returned = returned.replace("*"," ")
+    
+    
+    return returned
+    
+    
+    
+
+    
     
 
     
