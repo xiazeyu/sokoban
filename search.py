@@ -184,14 +184,36 @@ class Problem(object):
         state. The result would typically be a list, but if there are
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
-        raise NotImplementedError
+        acts=['Up','Left','Down','Right']
+        (x,y) = state.worker
+        for (wx,wy) in state.walls:
+            if x - 1 == wx:
+                acts.remove('Left')
+            elif x+1 == wx:
+                acts.remove('Right')
+            elif y+1 == wy:
+                acts.remove('Down')
+            elif y-1 == wy:
+                acts.remove('Up')
+        return acts
+
+            
 
     def result(self, state, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        raise NotImplementedError
-
+        (x,y) = state.worker
+        if action == 'Left':
+            state.worker = (x-1,y)
+        elif action == 'Up':
+            state.worker = (x,y-1)  
+        elif action == 'Down':
+            state.worker = (x-1,y)
+        elif action == 'Right':
+            state.worker =(x+1,y)
+        return state
+    
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
