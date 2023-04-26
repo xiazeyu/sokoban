@@ -187,14 +187,15 @@ class Problem(object):
         acts=['Up','Left','Down','Right']
         (x,y) = state.worker
         for (wx,wy) in state.walls:
-            if x - 1 == wx:
+            if x - 1 == wx or ((x-1,y) in state.boxes and x - 2 == wx):
                 acts.remove('Left')
-            elif x+1 == wx:
+            elif x+1 == wx or ((x+1,y) in state.boxes and x + 2 == wx):
                 acts.remove('Right')
-            elif y+1 == wy:
+            elif y+1 == wy or ((x,y +1) in state.boxes and y + 2 == wy):
                 acts.remove('Down')
-            elif y-1 == wy:
+            elif y-1 == wy or ((x,y-1) in state.boxes and y-2 == wy):
                 acts.remove('Up')
+
         return acts
 
             
@@ -206,12 +207,25 @@ class Problem(object):
         (x,y) = state.worker
         if action == 'Left':
             state.worker = (x-1,y)
+            for index, (boxX, boxY) in  enumerate(state.boxes):
+                if (boxX, boxY) == state.worker:
+                    state.boxes[index] =(boxX -1 , boxY)
         elif action == 'Up':
             state.worker = (x,y-1)  
+            for index, (boxX, boxY) in  enumerate(state.boxes):
+                if (boxX, boxY) == state.worker:
+                    state.boxes[index] =(boxX, boxY-1)
         elif action == 'Down':
             state.worker = (x-1,y)
+            for index, (boxX, boxY) in  enumerate(state.boxes):
+                if (boxX, boxY) == state.worker:
+                    state.boxes[index] =(boxX , boxY-1)
         elif action == 'Right':
             state.worker =(x+1,y)
+            for index, (boxX, boxY) in  enumerate(state.boxes):
+                if (boxX, boxY) == state.worker:
+                    state.boxes[index] =(boxX +1 , boxY)
+
         return state
     
     def goal_test(self, state):
