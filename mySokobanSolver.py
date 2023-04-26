@@ -86,12 +86,10 @@ def taboo_cells(warehouse):
         #up,down,left,right
         sideToWall = 0
         for (actionX,actionY) in couldGo:
-            touchWall = False
             if (actionX,actionY) in frontier or (actionX,actionY) in exploded:
                 continue
                 #if already in frontier or exploded, remove to avoid loop
             if (actionX,actionY) in warehouse.walls:
-                touchWall = True
                 sideToWall += 1
                 #check if walk to wall
             else:
