@@ -42,8 +42,8 @@ def my_team():
     of triplet of the form (student_number, first_name, last_name)
     
     '''
-#    return [ (1234567, 'Ada', 'Lovelace'), (1234568, 'Grace', 'Hopper'), (1234569, 'Eva', 'Tardos') ]
-    raise NotImplementedError()
+    return [ (11262141, 'Tian-Ching', 'Lan')]
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -73,8 +73,23 @@ def taboo_cells(warehouse):
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
     '''
+    #warehouse.extract_locations(warehouse.__str__())
+    print(warehouse.walls)
     ##         "INSERT YOUR CODE HERE"    
-    raise NotImplementedError()
+    returned = ''
+    
+
+    
+    
+    # print(returned) 
+
+
+   
+
+    
+        
+
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
