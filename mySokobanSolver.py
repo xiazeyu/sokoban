@@ -48,7 +48,6 @@ def my_team():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
 def taboo_cells(warehouse):
     '''  
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
@@ -73,8 +72,7 @@ def taboo_cells(warehouse):
        a '#' and the taboo cells marked with a 'X'.  
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
-    '''
-    ##         "INSERT YOUR CODE HERE"    
+    '''  
     exploded = []
     corner = []
     taboo = []
@@ -131,23 +129,6 @@ def taboo_cells(warehouse):
     
     
     return returned
-    
-    
-    
-
-    
-    
-
-    
-    
-    # print(returned) 
-
-
-   
-
-    
-        
-
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

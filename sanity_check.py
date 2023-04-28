@@ -22,23 +22,34 @@ try:
     from fredSokobanSolver import taboo_cells, solve_weighted_sokoban, check_elem_action_seq
     print("Using Fred's solver")
 except ModuleNotFoundError:
-    from mySokobanSolver import taboo_cells, solve_weighted_sokoban, check_elem_action_seq
+    from mySokobanSolver import taboo_cells, solve_weighted_sokoban, check_elem_action_seq, my_team
     print("Using submitted solver")
 
     
 def test_taboo_cells():
-    wh = Warehouse()
-    wh.load_warehouse("./warehouses/warehouse_01.txt")
-    expected_answer = '####  \n#X #  \n#  ###\n#   X#\n#   X#\n#XX###\n####  '
-    answer = taboo_cells(wh)
-    fcn = test_taboo_cells    
-    print('<<  Testing {} >>'.format(fcn.__name__))
-    if answer==expected_answer:
-        print(fcn.__name__, ' passed!  :-)\n')
-    else:
-        print(fcn.__name__, ' failed!  :-(\n')
-        print('Expected ');print(expected_answer)
-        print('But, received ');print(answer)
+    datasets = [
+        [
+"./warehouses/warehouse_01.txt",
+'''####  
+#X #  
+#  ###
+#   X#
+#   X#
+#XX###
+####  '''],
+    ]
+    for index, (warehouse, expected_answer) in enumerate(datasets):
+        wh = Warehouse()
+        wh.load_warehouse(warehouse)
+        answer = taboo_cells(wh)
+        fcn = test_taboo_cells    
+        print('<<  Testing {} >>'.format(fcn.__name__))
+        if answer==expected_answer:
+            print(fcn.__name__, f' passed for {index}!  :-)\n')
+        else:
+            print(fcn.__name__, f' failed for {index}!  :-(\n')
+            print('Expected ');print(expected_answer)
+            print('But, received ');print(answer)
         
 def test_check_elem_action_seq():
     wh = Warehouse()
@@ -92,7 +103,7 @@ def test_solve_weighted_sokoban():
 
 if __name__ == "__main__":
     pass    
-#    print(my_team())  # should print your team
+    print(my_team())  # should print your team
 
     test_taboo_cells() 
     test_check_elem_action_seq()
