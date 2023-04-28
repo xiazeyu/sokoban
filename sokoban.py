@@ -61,7 +61,7 @@ class Warehouse:
     The attributes 'self.boxes', 'self.targets' and 'self.walls'
     are tuples of (x,y) coordinates (x <-> columns, y <-> rows).
     The attribute 'self.worker' is a tuple (x,y)
-    The origin is at the top left. 
+    The origin (0, 0) is at the top left. 
     The horizontal axis 'x' is pointing right.
     The vertical axis 'y' is pointing down.  
     The attributes  self.nrows and self.ncols are 

@@ -48,6 +48,9 @@ def my_team():
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+actions_offset = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
+# Left, Right, Up, Down; v: vertical, h: horizontal
+
 def taboo_cells(warehouse):
     '''  
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
@@ -72,63 +75,90 @@ def taboo_cells(warehouse):
        a '#' and the taboo cells marked with a 'X'.  
        The returned string should NOT have marks for the worker, the targets,
        and the boxes.  
-    '''  
-    exploded = []
-    corner = []
+    '''
     taboo = []
+    corner = []
+    exploded = []
     frontier = [warehouse.worker]
+
     while frontier:
-        (currentX,currentY) = frontier[0]
-        exploded.append((currentX,currentY))
-        couldGo = [(currentX,currentY-1), (currentX,currentY+1),(currentX-1,currentY), (currentX+1,currentY)]
-        #up,down,left,right
-        sideToWall = 0
-        for (actionX,actionY) in couldGo:
-            if (actionX,actionY) in frontier or (actionX,actionY) in exploded:
-                continue
-                #if already in frontier or exploded, remove to avoid loop
-            if (actionX,actionY) in warehouse.walls:
-                sideToWall += 1
-                #check if walk to wall
-            else:
-                frontier.append((actionX,actionY))
-            #if not wall or expold    
-        if sideToWall >=2 and (currentX,currentY) not in warehouse.targets:
-            corner.append((currentX,currentY))
+        current = frontier[0]
+        exploded.append(current)
+        
+        wall_counter = {'v': 0, 'h': 0}
+        
+        for new_pos, new_dir in [((current[0] + offsetx, current[1] + offsety),
+                                 direction) for offsetx, offsety, direction in actions_offset]:
             
-        frontier.remove((currentX,currentY))
-    taboo = corner
+            if new_pos in frontier or new_pos in exploded:
+                # skip queued and explored cells
+                continue
+            if new_pos in warehouse.walls:
+                # count wall cells around current cell
+                wall_counter[new_dir] += 1
+            else:
+                frontier.append(new_pos)
+        
+        # a corner appears if both direction have at least one wall
+        if wall_counter['v'] and wall_counter['h']:
+            corner.append(current)    
+        
+        frontier.remove(current)
     
-    for ((corner1X,corner1Y),(corner2X,corner2Y)) in itertools.combinations_with_replacement(corner,2):
-        #[((corner1X,corner1Y),(corner2X,corner2Y)), ((corner1X,corner1Y),(corner3X,corner3Y))]
-        if corner1X == corner2X:
-            isTaboo = True
-            for checkWallY in range(min(corner1Y,corner2Y)+1, max(corner1Y,corner2Y)) :
-                if (((corner1X+1,checkWallY) not in warehouse.walls and (corner1X-1,checkWallY) not in warehouse.walls)) or (corner1X,checkWallY) in warehouse.targets or (corner1X,checkWallY) in warehouse.boxes:
-                    isTaboo = False
+    for cell in corner:
+        if cell not in warehouse.targets:
+            # Rule 1: if a cell is a corner and not a target, then it is a taboo cell.
+            taboo.append(cell)
+
+    for (corner_a, corner_b) in itertools.combinations(corner, 2):
+        # if cells between corners are along a wall, they should have same x or y position
+        # Rule 2: all the cells between two corners along a wall are taboo if none of 
+        #         these cells is a target.
+        if corner_a[0] == corner_b[0]:
+            cell_x = corner_a[0]
+            # x fixed to corner_a[0]
+            # test if in-between cells are along a wall, without a target, continuously
+            continuous_taboo = True
+            
+            for cell_y in range(min(corner_a[1], corner_b[1]) + 1, max(corner_a[1], corner_b[1])):
+                if (((cell_x-1, cell_y) not in warehouse.walls # along a left-side wall
+                    and (cell_x+1, cell_y) not in warehouse.walls) # along a right-side wall
+                    or (cell_x, cell_y) in warehouse.targets): # cell is a target
+                    # FIXME: (cell_x, cell_y) in warehouse.boxes?
+                    
+                    continuous_taboo = False
                     break
-            if isTaboo:
-                for checkWallY in range(min(corner1Y,corner2Y)+1, max(corner1Y,corner2Y)):
-                    taboo.append((corner1X,checkWallY))
-        elif  corner1Y == corner2Y:
-            isTaboo = True
-            for checkWallX in range(min(corner1X,corner2X)+1, max(corner1X,corner2X)) :
-                if ((checkWallX, corner1Y+1) not in warehouse.walls and (checkWallX,checkWallY-1) not in warehouse.walls) or (checkWallX,checkWallY+1) in warehouse.targets or (checkWallX,checkWallY) in warehouse.boxes:
-                    isTaboo = False
+            
+            if continuous_taboo:
+                for cell_y in range(min(corner_a[1], corner_b[1]) + 1, max(corner_a[1], corner_b[1])):
+                    taboo.append((cell_x, cell_y))
+        
+        if corner_a[1] == corner_b[1]:
+            cell_y = corner_a[1]
+            # y fixed to corner_a[1]
+            # test if in-between cells are along a wall, without a target, continuously
+            continuous_taboo = True
+            
+            for cell_x in range(min(corner_a[0], corner_b[0]) + 1, max(corner_a[0], corner_b[0])):
+                if (((cell_x, cell_y-1) not in warehouse.walls # along a down-side wall
+                    and (cell_x, cell_y+1) not in warehouse.walls) # along a up-side wall
+                    or (cell_x, cell_y) in warehouse.targets): # cell is a target
+                    # FIXME: (cell_x, cell_y) in warehouse.boxes?
+                    
+                    continuous_taboo = False
                     break
-            if isTaboo:
-                for checkWallX in range(min(corner1X,corner2X)+1, max(corner1X,corner2X)):
-                    taboo.append((checkWallX,corner1X))
-    returned = warehouse.__str__()              
-    for (tabooX,tabooY) in taboo:
-        returned = returned[:(warehouse.ncols+1) * tabooY + tabooX] + 'X' + returned[(warehouse.ncols+1) * tabooY + tabooX + 1:]
-    returned = returned.replace("."," ")
-    returned = returned.replace("@"," ")
-    returned = returned.replace("$"," ")
-    returned = returned.replace("*"," ")
+            
+            if continuous_taboo:
+                for cell_x in range(min(corner_a[0], corner_b[0]) + 1, max(corner_a[0], corner_b[0])):
+                    taboo.append((cell_x, cell_y))
+                    
+    returned = str(warehouse).replace("$"," ").replace("."," ").replace("@"," ").replace("!"," ").replace("*"," ")
+    returned = returned.split('\n')
     
+    for cell in taboo:
+        replace_str_2d(returned, cell, 'X')
     
-    return returned
+    return '\n'.join(returned)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -302,3 +332,48 @@ def solve_weighted_sokoban(warehouse):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+def replace_str_index(text, index, replacement):
+    '''
+    Repace the string with a char at given index.
+
+    Parameters
+    ----------
+    text : str
+        Original string.
+    index : int
+        Index to replace.
+    replacement : str
+        Single character.
+
+    Returns
+    -------
+    str
+        Replaced string.
+
+    '''
+    return f'{text[:index]}{replacement}{text[index+1:]}'
+
+def replace_str_2d(text, index, replacement):
+    '''
+    Replace the string (in 2D addressing mode) with given char.
+    Index starts at (0, 0).
+    
+    NOTICE: This function have side-effects, which means it changes original list.
+
+    Parameters
+    ----------
+    text : list
+        List of string.
+    index : tuple
+        Tuple of index, representing x and y.
+    replacement : str
+        Single character.
+
+    Returns
+    -------
+    str
+        Replaced string.
+
+    '''
+    text[index[1]] = replace_str_index(text[index[1]], index[0], replacement)
+    return text
