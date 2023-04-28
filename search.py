@@ -184,49 +184,13 @@ class Problem(object):
         state. The result would typically be a list, but if there are
         many actions, consider yielding them one at a time in an
         iterator, rather than building them all at once."""
-        acts=['Up','Left','Down','Right']
-        (x,y) = state.worker
-        for (wx,wy) in state.walls:
-            if x - 1 == wx or ((x-1,y) in state.boxes and x - 2 == wx):
-                acts.remove('Left')
-            elif x+1 == wx or ((x+1,y) in state.boxes and x + 2 == wx):
-                acts.remove('Right')
-            elif y+1 == wy or ((x,y +1) in state.boxes and y + 2 == wy):
-                acts.remove('Down')
-            elif y-1 == wy or ((x,y-1) in state.boxes and y-2 == wy):
-                acts.remove('Up')
-
-        return acts
-
-            
+        raise NotImplementedError
 
     def result(self, state, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        (x,y) = state.worker
-        if action == 'Left':
-            state.worker = (x-1,y)
-            for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX -1 , boxY)
-        elif action == 'Up':
-            state.worker = (x,y-1)  
-            for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX, boxY-1)
-        elif action == 'Down':
-            state.worker = (x-1,y)
-            for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX , boxY-1)
-        elif action == 'Right':
-            state.worker =(x+1,y)
-            for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX +1 , boxY)
-
-        return state
+        raise NotImplementedError
     
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
