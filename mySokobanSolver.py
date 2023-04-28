@@ -51,7 +51,7 @@ def my_team():
 actions_offset = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
 # Left, Right, Up, Down; v: vertical, h: horizontal
 
-def taboo_cells(warehouse):
+def taboo_cells(warehouse, returnType = "str"):
     '''  
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
     a cell inside a warehouse such that whenever a box get pushed on such 
@@ -158,7 +158,10 @@ def taboo_cells(warehouse):
     for cell in taboo:
         replace_str_2d(returned, cell, 'X')
     
-    return '\n'.join(returned)
+    if returnType == "str":
+        return '\n'.join(returned)
+    elif returnType == "list":
+        return taboo
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -189,22 +192,22 @@ class SokobanPuzzle(search.Problem):
 
     def __init__(self, warehouse):
         self.initial = warehouse
+        self.taboo_cells = taboo_cells(warehouse, "list")
 
     def actions(self, state):
         """
         Return the list of actions that can be executed in the given state.
         
         """
-
         acts=['Up','Left','Down','Right']
         (x,y) = state.worker
-        if (x - 1 , y) in state.walls or ((x-1 , y) in state.boxes and (x - 2,y) in state.walls + state.boxes):
+        if (x - 1 , y) in state.walls or ((x-1 , y) in state.boxes and (x - 2,y) in state.walls + state.boxes + self.taboo_cells):
             acts.remove('Left')
-        if (x + 1 , y) in state.walls or ((x+1 , y) in state.boxes and (x +2,y) in state.walls + state.boxes):
+        if (x + 1 , y) in state.walls or ((x+1 , y) in state.boxes and (x +2,y) in state.walls + state.boxes + self.taboo_cells):
             acts.remove('Right')
-        if (x , y-1) in state.walls or ((x , y-1) in state.boxes and (x,y-2) in state.walls + state.boxes):
+        if (x , y-1) in state.walls or ((x , y-1) in state.boxes and (x,y-2) in state.walls + state.boxes + self.taboo_cells):
             acts.remove('Up')
-        if (x , y+1) in state.walls or ((x , y+1) in state.boxes and (x,y+2) in state.walls + state.boxes):
+        if (x , y+1) in state.walls or ((x , y+1) in state.boxes and (x,y+2) in state.walls + state.boxes + self.taboo_cells):
             acts.remove('Down')
         return acts
     
@@ -326,7 +329,11 @@ def solve_weighted_sokoban(warehouse):
             C is the total cost of the action sequence C
 
     '''
-    
+    problem = SokobanPuzzle(warehouse)
+
+    sol_ts = search.astar_graph_search(problem)  # graph search version
+
+    print (sol_ts)
     raise NotImplementedError()
 
 

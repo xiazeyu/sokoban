@@ -324,6 +324,7 @@ def graph_search(problem, frontier):
     explored = set() # initial empty set of explored states
     while frontier:
         node = frontier.pop()
+        print(node.state)
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
@@ -337,6 +338,7 @@ def graph_search(problem, frontier):
 def breadth_first_tree_search(problem):
     "Search the shallowest nodes in the search tree first."
     return tree_search(problem, FIFOQueue())
+
 
 
 def depth_first_tree_search(problem):
@@ -386,6 +388,7 @@ def best_first_tree_search(problem, f):
                     # replace the incumbent with child
                     del frontier[child]
                     frontier.append(child)
+    
     return None
 
 
@@ -404,6 +407,7 @@ def best_first_graph_search(problem, f):
     frontier.append(node)
     explored = set() # set of states
     while frontier:
+        
         node = frontier.pop()
         if problem.goal_test(node.state):
             return node
