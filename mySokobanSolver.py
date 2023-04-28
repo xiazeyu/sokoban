@@ -124,7 +124,6 @@ def taboo_cells(warehouse):
                 if (((cell_x-1, cell_y) not in warehouse.walls # along a left-side wall
                     and (cell_x+1, cell_y) not in warehouse.walls) # along a right-side wall
                     or (cell_x, cell_y) in warehouse.targets): # cell is a target
-                    # FIXME: (cell_x, cell_y) in warehouse.boxes?
                     
                     continuous_taboo = False
                     break
@@ -143,7 +142,6 @@ def taboo_cells(warehouse):
                 if (((cell_x, cell_y-1) not in warehouse.walls # along a down-side wall
                     and (cell_x, cell_y+1) not in warehouse.walls) # along a up-side wall
                     or (cell_x, cell_y) in warehouse.targets): # cell is a target
-                    # FIXME: (cell_x, cell_y) in warehouse.boxes?
                     
                     continuous_taboo = False
                     break
