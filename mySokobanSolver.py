@@ -236,22 +236,23 @@ class SokobanPuzzle(search.Problem):
         if action == 'Left':
             next_state.worker = (x-1,y)
             for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
+                if (boxX, boxY) == next_state.worker:
                     next_state.boxes[index] =(boxX -1 , boxY)
         elif action == 'Up':
             next_state.worker = (x,y-1)  
+
             for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
+                if (boxX, boxY) == next_state.worker:
                     next_state.boxes[index] =(boxX, boxY-1)
         elif action == 'Down':
             next_state.worker = (x,y+1)
             for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
+                if (boxX, boxY) == next_state.worker:
                     next_state.boxes[index] =(boxX , boxY+1)
         elif action == 'Right':
             next_state.worker =(x+1,y)
             for index, (boxX, boxY) in  enumerate(state.boxes):
-                if (boxX, boxY) == state.worker:
+                if (boxX, boxY) == next_state.worker:
                     next_state.boxes[index] =(boxX +1 , boxY)
         return next_state
     
@@ -330,7 +331,7 @@ def solve_weighted_sokoban(warehouse):
     '''
     problem = SokobanPuzzle(warehouse)
 
-    sol_ts = search.astar_graph_search(problem)  # graph search version
+    sol_ts = search.breadth_first_graph_search(problem)  # graph search version
 
     print (sol_ts)
     raise NotImplementedError()
