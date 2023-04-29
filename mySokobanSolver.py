@@ -36,10 +36,11 @@ from typing import Callable
 import functools
 import operator
 import copy
+import math
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-actions_offset: list[list[int, int, str]] = [
+_actions_offset: list[list[int, int, str]] = [
     [-1, 0, 'h'], [1, 0, 'h'], [0, -1, 'v'], [0, 1, 'v']]
 # Left, Right, Up, Down; v: vertical, h: horizontal
 _moves: dict[tuple[int, int]] = {
@@ -98,7 +99,7 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
         wall_counter = {'v': 0, 'h': 0}
 
         for new_pos, new_dir in [((current[0] + offsetx, current[1] + offsety),
-                                 direction) for offsetx, offsety, direction in actions_offset]:
+                                 direction) for offsetx, offsety, direction in _actions_offset]:
 
             if new_pos in frontier or new_pos in exploded:
                 # skip queued and explored cells
@@ -243,16 +244,54 @@ class State:
         return hash(self.worker) ^ functools.reduce(operator.xor, [hash(box) for box in self.boxes])
 
     def __str__(self) -> int:
-        return str({'worker': self.worker, 'boxes': self.boxes})
+        if self.f == None:
+            return str({'worker': self.worker, 'boxes': self.boxes})
+        return str({'worker': self.worker, 'boxes': self.boxes, 'f': self.f(self)})
 
 
-def manhattan_distance():
-    pass
+def manhattan_distance(a: tuple[int, int], b: tuple[int, int]) -> int:
+    '''
+    Calculate the Manhattan distance between two points.
+    '''
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def dijkstra():
-    pass
+def dist_map(warehouse: sokoban.Warehouse, start: tuple[int, int]) -> list[list[int]]:
+    '''
+    Dijkstra's algorithm for shortest path to all cells.
 
+    @param warehouse: a Warehouse object
+    @param start: the start position
+    @return: a distance matrix starting from start.
+    '''
+    # initialize
+    x_max = warehouse.ncols # x < x_max
+    y_max = warehouse.nrows # y < y_max
+    dist: list[list[int]] = [[math.inf for _ in range(warehouse.nrows)]
+            for _ in range(warehouse.ncols)]
+    final: list[list[bool]] = [[False for _ in range(warehouse.nrows)]
+            for _ in range(warehouse.ncols)]
+    Q = search.PriorityQueue(f=lambda x: x[1])
+    Q.append((start, 0))
+    dist[start[0]][start[1]] = 0
+    final[start[0]][start[1]] = True
+
+    while len(Q) > 0:
+        (x, y), _ = Q.pop()
+        for move in _moves:
+            dx, dy = _moves[move]
+            if x + dx >= x_max or x + dx < 0 or y + dy >= y_max or y + dy < 0:
+                continue
+            if (x + dx, y + dy) in warehouse.walls or (x + dx, y + dy) in warehouse.boxes:
+                continue
+            if final[x + dx][y + dy]:
+                continue
+            if dist[x + dx][y + dy] > dist[x][y] + 1:
+                dist[x + dx][y + dy] = dist[x][y] + 1
+                final[x + dx][y + dy] = True
+                Q.append(((x + dx, y + dy), dist[x + dx][y + dy]))
+
+    return dist
 
 class SokobanPuzzle(search.Problem):
     '''
