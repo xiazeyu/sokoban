@@ -236,6 +236,9 @@ class State:
     def __hash__(self) -> int:
         return hash(self.worker) ^ functools.reduce(operator.xor, [hash(box) for box in self.boxes])
 
+    def __str__(self) -> int:
+        return str({'worker': self.worker, 'boxes': self.boxes})
+
 class SokobanPuzzle(search.Problem):
     '''
 
@@ -259,27 +262,6 @@ class SokobanPuzzle(search.Problem):
         self.walls = warehouse.walls
         self.ncols = warehouse.ncols
         self.nrows = warehouse.nrows
-
-    def actions_worker(self, state: State) -> list[str]:
-        """
-        Return the list of worker's actions that can be executed in the given state.
-
-        NOTE: this action DID NOT filter out the actions that will lead to a taboo state.
-
-        Each action consists of a direction and a box index.
-        
-        """
-        moves = copy.copy(_moves)
-        for name in _moves:
-            (x,y) = state.worker
-            (dx,dy) = moves[name]
-            if (x+dx,y+dy) in self.walls:
-                moves.pop(name)
-            if (x+dx,y+dy) in state.boxes:
-                if (x+2*dx,y+2*dy) in self.walls + state.boxes:
-                    moves.pop(name)
-        
-        return moves
 
     def actions(self, state: State) -> list[str]:
         """
@@ -357,19 +339,6 @@ class SokobanPuzzle(search.Problem):
         next_state = State()
         return next_state
         raise NotImplementedError()
-
-    def result_worker(self, state: State, action: str) -> State:
-        """Return the state that results from executing the given
-        action in the given state. The action must be one of
-        self.actions_worker(state)."""
-        assert action in self.actions_worker(state)
-        x,y = state.worker
-        dx, dy = _moves[action]
-        next_state = state.copy(worker=(x+dx, y+dy))
-        for index, (box_x, box_y) in enumerate(state.boxes):
-            if (box_x, box_y) == next_state.worker:
-                next_state.boxes[index] = (box_x + dx , box_y + dy)
-        return next_state
     
     def value(self, state: State) -> int:
         """For optimization problems, each state has a value.  Hill-climbing
@@ -386,27 +355,55 @@ class SokobanPuzzle(search.Problem):
         return 0
         raise NotImplementedError()
     
-class SokabanPuzzleWorker(SokobanPuzzle):
+class SokobanPuzzleWorker(SokobanPuzzle):
     def __init__(self, warehouse: sokoban.Warehouse) -> None:
         super().__init__(warehouse)
 
     def actions(self, state: State) -> list[str]:
-        super().actions_worker(state)
+        """
+        Return the list of worker's actions that can be executed in the given state.
+
+        NOTE: this action DID NOT filter out the actions that will lead to a taboo state.
+
+        Each action consists of a direction and a box index.
+        
+        """
+        moves = copy.copy(_moves)
+        for name in _moves:
+            (x,y) = state.worker
+            (dx,dy) = moves[name]
+            if (x+dx,y+dy) in self.walls:
+                moves.pop(name)
+            if (x+dx,y+dy) in state.boxes:
+                if (x+2*dx,y+2*dy) in self.walls + state.boxes:
+                    moves.pop(name)
+        
+        return moves
     
     def result(self, state: State, action: str) -> State:
-        super().result_worker(state, action)
+        """Return the state that results from executing the given
+        action in the given state. The action must be one of
+        self.actions(state)."""
+        assert action in self.actions(state)
+        x,y = state.worker
+        dx, dy = _moves[action]
+        next_state = state.copy(worker=(x+dx, y+dy))
+        for index, (box_x, box_y) in enumerate(state.boxes):
+            if (box_x, box_y) == next_state.worker:
+                next_state.boxes[index] = (box_x + dx , box_y + dy)
+        return next_state
 
     def goal_test(self, state: State) -> bool:
-        super().goal_test(state)
+        return super().goal_test(state)
     
     def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
-        super().path_cost(c, state1, action, state2)
+        return super().path_cost(c, state1, action, state2)
     
     def value(self, state: State) -> int:
-        super().value(state)
+        return super().value(state)
 
     def h(self, state: State) -> int:
-        super().h(state)
+        return super().h(state)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -435,16 +432,16 @@ def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]):
                string returned by the method  Warehouse.__str__()
     '''
 
-    problem = SokobanPuzzle(warehouse)
+    problem = SokobanPuzzleWorker(warehouse)
     state = problem.initial
 
     for planed_act in action_seq :
-        if planed_act in problem.actions_worker(state):
-            state = problem.result_worker(state, planed_act)
+        if planed_act in problem.actions(state):
+            state = problem.result(state, planed_act)
         else:
             return "Impossible"
         
-    return warehouse.copy(worker=state.worker, boxes=state.boxes).__str__()
+    return str(warehouse.copy(worker=state.worker, boxes=state.boxes))
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -472,12 +469,12 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
             C is the total cost of the action sequence C
 
     '''
-    problem = SokobanPuzzle(warehouse)
+    problem = SokobanPuzzleWorker(warehouse)
 
     sol_ts = search.breadth_first_graph_search(problem)  # graph search version
 
     print (sol_ts)
-    raise NotImplementedError()
+    #raise NotImplementedError()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
