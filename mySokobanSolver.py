@@ -396,6 +396,18 @@ class SokabanPuzzleWorker(SokobanPuzzle):
     def result(self, state: State, action: str) -> State:
         super().result_worker(state, action)
 
+    def goal_test(self, state: State) -> bool:
+        super().goal_test(state)
+    
+    def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
+        super().path_cost(c, state1, action, state2)
+    
+    def value(self, state: State) -> int:
+        super().value(state)
+
+    def h(self, state: State) -> int:
+        super().h(state)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
