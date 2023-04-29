@@ -1,4 +1,3 @@
-
 '''
 
     Sokoban assignment
@@ -26,22 +25,25 @@ Last modified by 2022-03-27  by f.maire@qut.edu.au
 
 '''
 
-# You have to make sure that your code works with 
-# the files provided (search.py and sokoban.py) as your code will be tested 
+# You have to make sure that your code works with
+# the files provided (search.py and sokoban.py) as your code will be tested
 # with these files
 import itertools
-import search 
+import search
 import sokoban
 
 from typing import Callable
-import operator
 import functools
+import operator
 import copy
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-actions_offset: list[list[int, int, str]] = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
-_moves: dict[tuple[int, int]] = {'Left' :(-1,0), 'Right':(1,0) , 'Up':(0,-1), 'Down':(0,1)} # (x,y) = (column,row)
+actions_offset: list[list[int, int, str]] = [
+    [-1, 0, 'h'], [1, 0, 'h'], [0, -1, 'v'], [0, 1, 'v']]
+# Left, Right, Up, Down; v: vertical, h: horizontal
+_moves: dict[tuple[int, int]] = {
+    'Left': (-1, 0), 'Right': (1, 0), 'Up': (0, -1), 'Down': (0, 1)}  # (x,y) = (column,row)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -50,14 +52,13 @@ def my_team() -> list[tuple[int, str, str]]:
     '''
     Return the list of the team members of this assignment submission as a list
     of triplet of the form (student_number, first_name, last_name)
-    
+
     '''
-    return [ (11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia') ]
+    return [(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# Left, Right, Up, Down; v: vertical, h: horizontal
 
 def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
     '''  
@@ -67,17 +68,17 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
     a cell inside a warehouse such that whenever a box get pushed on such 
     a cell then the puzzle becomes unsolvable. 
-    
+
     Cells outside the warehouse are not taboo. It is a fail to tag an 
     outside cell as taboo.
-    
+
     When determining the taboo cells, you must ignore all the existing boxes, 
     only consider the walls and the target  cells.  
     Use only the following rules to determine the taboo cells;
      Rule 1: if a cell is a corner and not a target, then it is a taboo cell.
      Rule 2: all the cells between two corners along a wall are taboo if none of 
              these cells is a target.
-    
+
     @param warehouse: 
         a Warehouse object with the worker inside the warehouse
 
@@ -93,12 +94,12 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
     while frontier:
         current = frontier[0]
         exploded.append(current)
-        
+
         wall_counter = {'v': 0, 'h': 0}
-        
+
         for new_pos, new_dir in [((current[0] + offsetx, current[1] + offsety),
                                  direction) for offsetx, offsety, direction in actions_offset]:
-            
+
             if new_pos in frontier or new_pos in exploded:
                 # skip queued and explored cells
                 continue
@@ -107,13 +108,13 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
                 wall_counter[new_dir] += 1
             else:
                 frontier.append(new_pos)
-        
+
         # a corner appears if both direction have at least one wall
         if wall_counter['v'] and wall_counter['h']:
-            corner.append(current)    
-        
+            corner.append(current)
+
         frontier.remove(current)
-    
+
     for cell in corner:
         if cell not in warehouse.targets:
             # Rule 1: if a cell is a corner and not a target, then it is a taboo cell.
@@ -121,46 +122,47 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
 
     for (corner_a, corner_b) in itertools.combinations(corner, 2):
         # if cells between corners are along a wall, they should have same x or y position
-        # Rule 2: all the cells between two corners along a wall are taboo if none of 
+        # Rule 2: all the cells between two corners along a wall are taboo if none of
         #         these cells is a target.
         if corner_a[0] == corner_b[0]:
             cell_x = corner_a[0]
             # x fixed to corner_a[0]
             # test if in-between cells are along a wall, without a target, continuously
             continuous_taboo = True
-            
+
             for cell_y in range(min(corner_a[1], corner_b[1]) + 1, max(corner_a[1], corner_b[1])):
-                if (((cell_x-1, cell_y) not in warehouse.walls # along a left-side wall
-                    and (cell_x+1, cell_y) not in warehouse.walls) # along a right-side wall
-                    or (cell_x, cell_y) in warehouse.targets): # cell is a target
-                    
+                if (((cell_x-1, cell_y) not in warehouse.walls  # along a left-side wall
+                    and (cell_x+1, cell_y) not in warehouse.walls)  # along a right-side wall
+                        or (cell_x, cell_y) in warehouse.targets):  # cell is a target
+
                     continuous_taboo = False
                     break
-            
+
             if continuous_taboo:
                 for cell_y in range(min(corner_a[1], corner_b[1]) + 1, max(corner_a[1], corner_b[1])):
                     taboo.append((cell_x, cell_y))
-        
+
         if corner_a[1] == corner_b[1]:
             cell_y = corner_a[1]
             # y fixed to corner_a[1]
             # test if in-between cells are along a wall, without a target, continuously
             continuous_taboo = True
-            
+
             for cell_x in range(min(corner_a[0], corner_b[0]) + 1, max(corner_a[0], corner_b[0])):
-                if (((cell_x, cell_y-1) not in warehouse.walls # along a down-side wall
-                    and (cell_x, cell_y+1) not in warehouse.walls) # along a up-side wall
-                    or (cell_x, cell_y) in warehouse.targets): # cell is a target
-                    
+                if (((cell_x, cell_y-1) not in warehouse.walls  # along a down-side wall
+                    and (cell_x, cell_y+1) not in warehouse.walls)  # along a up-side wall
+                        or (cell_x, cell_y) in warehouse.targets):  # cell is a target
+
                     continuous_taboo = False
                     break
-            
+
             if continuous_taboo:
                 for cell_x in range(min(corner_a[0], corner_b[0]) + 1, max(corner_a[0], corner_b[0])):
                     taboo.append((cell_x, cell_y))
 
     # deduplicate
     return list(set(taboo))
+
 
 def taboo_cells(warehouse: sokoban.Warehouse) -> str:
     '''  
@@ -170,17 +172,17 @@ def taboo_cells(warehouse: sokoban.Warehouse) -> str:
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
     a cell inside a warehouse such that whenever a box get pushed on such 
     a cell then the puzzle becomes unsolvable. 
-    
+
     Cells outside the warehouse are not taboo. It is a fail to tag an 
     outside cell as taboo.
-    
+
     When determining the taboo cells, you must ignore all the existing boxes, 
     only consider the walls and the target  cells.  
     Use only the following rules to determine the taboo cells;
      Rule 1: if a cell is a corner and not a target, then it is a taboo cell.
      Rule 2: all the cells between two corners along a wall are taboo if none of 
              these cells is a target.
-    
+
     @param warehouse: 
         a Warehouse object with the worker inside the warehouse
 
@@ -191,30 +193,34 @@ def taboo_cells(warehouse: sokoban.Warehouse) -> str:
        and the boxes.  
     '''
     taboo = taboo_cells_solver(warehouse)
-    
-    returned = str(warehouse).replace("$"," ").replace("."," ").replace("@"," ").replace("!"," ").replace("*"," ")
+
+    returned = str(warehouse).replace("$", " ").replace(
+        ".", " ").replace("@", " ").replace("!", " ").replace("*", " ")
     returned = returned.split('\n')
-    
+
     for cell in taboo:
         replace_str_2d(returned, cell, 'X')
-    
+
     return '\n'.join(returned)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
 class State:
     '''
     An instance of the class 'State' represents a state of a Sokoban puzzle.
     '''
-    def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None, f: Callable[[],int] = None) -> None:
+
+    def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None, f: Callable[[], int] = None) -> None:
         self.worker = worker
         self.boxes = copy.copy(boxes)
         self.f = f
 
     def copy(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None):
         clone = State()
-        clone.worker = worker or self.worker # tuple is immutable
-        clone.boxes = copy.copy(boxes) or copy.copy(self.boxes) # array is mutable, again, tuple is immutable
+        clone.worker = worker or self.worker  # tuple is immutable
+        # array is mutable, again, tuple is immutable
+        clone.boxes = copy.copy(boxes) or copy.copy(self.boxes)
         clone.f = self.f
         return clone
 
@@ -227,7 +233,7 @@ class State:
                 return False
 
         return True
-    
+
     def __lt__(self, other) -> bool:
         if self.f == None:
             raise RuntimeError("f is not defined in State")
@@ -238,6 +244,15 @@ class State:
 
     def __str__(self) -> int:
         return str({'worker': self.worker, 'boxes': self.boxes})
+
+
+def manhattan_distance():
+    pass
+
+
+def dijkstra():
+    pass
+
 
 class SokobanPuzzle(search.Problem):
     '''
@@ -250,7 +265,7 @@ class SokobanPuzzle(search.Problem):
 
     Your implementation should be fully compatible with the search functions of 
     the provided module 'search.py'. 
-    
+
     '''
 
     def __init__(self, warehouse: sokoban.Warehouse) -> None:
@@ -268,26 +283,26 @@ class SokobanPuzzle(search.Problem):
         Return the list of boxes' actions that can be executed in the given state.
 
         Each action consists of a direction and a box index.
-        
+
         """
         raise NotImplementedError()
         for box in state.boxes:
             # if box in self.warehouse.targets:
             #     continue
             # Skip if box is on a target
-        
+
             moves = copy.copy(_moves)
             for name in _moves:
-                (x,y) = state.box
-                (dx,dy) = moves[name]
-                if (x+dx,y+dy) in self.walls:
+                (x, y) = state.box
+                (dx, dy) = moves[name]
+                if (x+dx, y+dy) in self.walls:
                     moves.pop(name)
-                if (x+dx,y+dy) in state.boxes:
-                    if (x+2*dx,y+2*dy) in self.taboo_cells + self.walls + state.boxes:
+                if (x+dx, y+dy) in state.boxes:
+                    if (x+2*dx, y+2*dy) in self.taboo_cells + self.walls + state.boxes:
                         moves.pop(name)
-        
+
         return moves
-    
+
     def goal_test(self, state: State) -> bool:
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
@@ -296,8 +311,7 @@ class SokobanPuzzle(search.Problem):
             if box not in self.targets:
                 return False
         return True
-        
-    
+
     def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
         """Return the cost of a solution path that arrives at state2 from
         state1 via action, assuming cost c to get up to state1. If the problem
@@ -305,60 +319,60 @@ class SokobanPuzzle(search.Problem):
         state2.  If the path does matter, it will consider c and maybe state1
         and action. The default method costs 1 for every step in the path."""
         assert action in self.actions(state1)
-        (x,y) = state1.worker
+        (x, y) = state1.worker
         if action == 'Left':
-            for index, (boxX, boxY) in  enumerate(state1.boxes):
-                if (boxX, boxY) == (x-1,y):
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x-1, y):
                     c += self.weights[index]
         elif action == 'Up':
-            for index, (boxX, boxY) in  enumerate(state1.boxes):
-                if (boxX, boxY) == (x,y-1):
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x, y-1):
                     c += self.weights[index]
         elif action == 'Down':
-            for index, (boxX, boxY) in  enumerate(state1.boxes):
-                if (boxX, boxY) == (x,y+1):
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x, y+1):
                     c += self.weights[index]
         elif action == 'Right':
-            for index, (boxX, boxY) in  enumerate(state1.boxes):
-                if (boxX, boxY) == (x+1,y):
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x+1, y):
                     c += self.weights[index]
         return c + 1
         raise NotImplementedError()
-    
+
     def result(self, state: State, action: str) -> State:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
         assert action in self.actions(state)
         next_box, next_worker = None, None
-        next_state = copy.copy(state)# HACK?
-        (x,y) = state.worker
+        next_state = copy.copy(state)  # HACK?
+        (x, y) = state.worker
         if action == 'Left':
-            next_state.worker = (x-1,y)
-            for index, (boxX, boxY) in  enumerate(state.boxes):
+            next_state.worker = (x-1, y)
+            for index, (boxX, boxY) in enumerate(state.boxes):
                 if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] =(boxX -1 , boxY)
+                    next_state.boxes[index] = (boxX - 1, boxY)
         elif action == 'Up':
-            next_state.worker = (x,y-1)  
+            next_state.worker = (x, y-1)
 
-            for index, (boxX, boxY) in  enumerate(state.boxes):
+            for index, (boxX, boxY) in enumerate(state.boxes):
                 if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] =(boxX, boxY-1)
+                    next_state.boxes[index] = (boxX, boxY-1)
         elif action == 'Down':
-            next_state.worker = (x,y+1)
-            for index, (boxX, boxY) in  enumerate(state.boxes):
+            next_state.worker = (x, y+1)
+            for index, (boxX, boxY) in enumerate(state.boxes):
                 if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] =(boxX , boxY+1)
+                    next_state.boxes[index] = (boxX, boxY+1)
         elif action == 'Right':
-            next_state.worker =(x+1,y)
-            for index, (boxX, boxY) in  enumerate(state.boxes):
+            next_state.worker = (x+1, y)
+            for index, (boxX, boxY) in enumerate(state.boxes):
                 if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] =(boxX +1 , boxY)
+                    next_state.boxes[index] = (boxX + 1, boxY)
 
         next_state = State()
         return next_state
         raise NotImplementedError()
-    
+
     def value(self, state: State) -> int:
         """For optimization problems, each state has a value.  Hill-climbing
         and related algorithms try to maximize this value."""
@@ -375,18 +389,20 @@ class SokobanPuzzle(search.Problem):
         # to the goal_node
         path = goal_node.path()
         # print the solution
-        print ("Solution takes {0} steps from the initial state".format(len(path)-1))
-        print ("Solution takes {0} cost from the initial state".format(goal_node.path_cost))
+        print("Solution takes {0} steps from the initial state".format(
+            len(path)-1))
+        print("Solution takes {0} cost from the initial state".format(
+            goal_node.path_cost))
 
-        print (path[0].state)
-        print ("to the goal state")
-        print (path[-1].state)
-        print ("\nBelow is the sequence of moves\n")
+        print(path[0].state)
+        print("to the goal state")
+        print(path[-1].state)
+        print("\nBelow is the sequence of moves\n")
         for node in path:
             if node.action is not None:
-                print ("move to {0}".format(node.action))
-            print (node.state)
-    
+                print("move to {0}".format(node.action))
+            print(node.state)
+
     def h(self, state: State) -> int:
         '''
         Heuristic for goal state. 
@@ -394,7 +410,8 @@ class SokobanPuzzle(search.Problem):
         '''
         return 0
         raise NotImplementedError()
-    
+
+
 class SokobanPuzzleWorker(SokobanPuzzle):
     def __init__(self, warehouse: sokoban.Warehouse) -> None:
         super().__init__(warehouse)
@@ -406,39 +423,39 @@ class SokobanPuzzleWorker(SokobanPuzzle):
         NOTE: this action DID NOT filter out the actions that will lead to a taboo state.
 
         Each action consists of a direction and a box index.
-        
+
         """
         moves = copy.copy(_moves)
         for name in _moves:
-            (x,y) = state.worker
-            (dx,dy) = moves[name]
-            if (x+dx,y+dy) in self.walls:
+            (x, y) = state.worker
+            (dx, dy) = moves[name]
+            if (x+dx, y+dy) in self.walls:
                 moves.pop(name)
-            if (x+dx,y+dy) in state.boxes:
-                if (x+2*dx,y+2*dy) in self.walls + state.boxes:
+            if (x+dx, y+dy) in state.boxes:
+                if (x+2*dx, y+2*dy) in self.walls + state.boxes:
                     moves.pop(name)
-        
+
         return moves
-    
+
     def result(self, state: State, action: str) -> State:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
         assert action in self.actions(state)
-        x,y = state.worker
+        x, y = state.worker
         dx, dy = _moves[action]
         next_state = state.copy(worker=(x+dx, y+dy))
         for index, (box_x, box_y) in enumerate(state.boxes):
             if (box_x, box_y) == next_state.worker:
-                next_state.boxes[index] = (box_x + dx , box_y + dy)
+                next_state.boxes[index] = (box_x + dx, box_y + dy)
         return next_state
 
     def goal_test(self, state: State) -> bool:
         return super().goal_test(state)
-    
+
     def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
         return super().path_cost(c, state1, action, state2)
-    
+
     def value(self, state: State) -> int:
         return super().value(state)
 
@@ -450,18 +467,18 @@ class SokobanPuzzleWorker(SokobanPuzzle):
 
 def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]):
     '''
-    
+
     Determine if the sequence of actions listed in 'action_seq' is legal or not.
-    
+
     Important notes:
       - a legal sequence of actions does not necessarily solve the puzzle.
       - an action is legal even if it pushes a box onto a taboo cell.
-        
+
     @param warehouse: a valid Warehouse object
 
     @param action_seq: a sequence of legal actions.
            For example, ['Left', 'Down', Down','Right', 'Up', 'Down']
-           
+
     @return
         The string 'Impossible', if one of the action was not valid.
            For example, if the agent tries to push two boxes at the same time,
@@ -475,12 +492,12 @@ def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]):
     problem = SokobanPuzzleWorker(warehouse)
     state = problem.initial
 
-    for planed_act in action_seq :
+    for planed_act in action_seq:
         if planed_act in problem.actions(state):
             state = problem.result(state, planed_act)
         else:
             return "Impossible"
-        
+
     return str(warehouse.copy(worker=state.worker, boxes=state.boxes))
 
 
@@ -491,15 +508,15 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
     This function analyses the given warehouse.
     It returns the two items. The first item is an action sequence solution. 
     The second item is the total cost of this action sequence.
-    
+
     @param 
      warehouse: a valid Warehouse object
 
     @return
-    
+
         If puzzle cannot be solved 
             return 'Impossible', None
-        
+
         If a solution was found, 
             return S, C 
             where S is a list of actions that solves
@@ -513,7 +530,8 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
 
     sol_ts = search.breadth_first_graph_search(problem)  # graph search version
     problem.print_solution(sol_ts)
-    #raise NotImplementedError()
+    return sol_ts,
+    # raise NotImplementedError()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -539,11 +557,12 @@ def replace_str_index(text: str, index: int, replacement: str):
     '''
     return f'{text[:index]}{replacement}{text[index+1:]}'
 
+
 def replace_str_2d(text: str, index: int, replacement: str):
     '''
     Replace the string (in 2D addressing mode) with given char.
     Index starts at (0, 0).
-    
+
     NOTICE: This function have side-effects, which means it changes original list.
 
     Parameters
