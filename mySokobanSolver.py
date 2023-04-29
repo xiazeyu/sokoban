@@ -296,6 +296,7 @@ class SokobanPuzzle(search.Problem):
             if box not in self.targets:
                 return False
         return True
+        
     
     def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
         """Return the cost of a solution path that arrives at state2 from
@@ -303,6 +304,24 @@ class SokobanPuzzle(search.Problem):
         is such that the path doesn't matter, this function will only look at
         state2.  If the path does matter, it will consider c and maybe state1
         and action. The default method costs 1 for every step in the path."""
+        assert action in self.actions(state1)
+        (x,y) = state1.worker
+        if action == 'Left':
+            for index, (boxX, boxY) in  enumerate(state1.boxes):
+                if (boxX, boxY) == (x-1,y):
+                    c += self.weights[index]
+        elif action == 'Up':
+            for index, (boxX, boxY) in  enumerate(state1.boxes):
+                if (boxX, boxY) == (x,y-1):
+                    c += self.weights[index]
+        elif action == 'Down':
+            for index, (boxX, boxY) in  enumerate(state1.boxes):
+                if (boxX, boxY) == (x,y+1):
+                    c += self.weights[index]
+        elif action == 'Right':
+            for index, (boxX, boxY) in  enumerate(state1.boxes):
+                if (boxX, boxY) == (x+1,y):
+                    c += self.weights[index]
         return c + 1
         raise NotImplementedError()
     
@@ -346,6 +365,27 @@ class SokobanPuzzle(search.Problem):
         return 0
         raise NotImplementedError()
 
+    def print_solution(self, goal_node):
+        """
+            Shows solution represented by a specific goal node.
+            For example, goal node could be obtained by calling 
+                goal_node = breadth_first_tree_search(problem)
+        """
+        # path is list of nodes from initial state (root of the tree)
+        # to the goal_node
+        path = goal_node.path()
+        # print the solution
+        print ("Solution takes {0} steps from the initial state".format(len(path)-1))
+        print ("Solution takes {0} cost from the initial state".format(goal_node.path_cost))
+
+        print (path[0].state)
+        print ("to the goal state")
+        print (path[-1].state)
+        print ("\nBelow is the sequence of moves\n")
+        for node in path:
+            if node.action is not None:
+                print ("move to {0}".format(node.action))
+            print (node.state)
     
     def h(self, state: State) -> int:
         '''
@@ -472,8 +512,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
     problem = SokobanPuzzleWorker(warehouse)
 
     sol_ts = search.breadth_first_graph_search(problem)  # graph search version
-
-    print (sol_ts)
+    problem.print_solution(sol_ts)
     #raise NotImplementedError()
 
 

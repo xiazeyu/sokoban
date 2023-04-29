@@ -32,6 +32,7 @@ assert sys.version_info >= (3, 5)
 import itertools
 import functools
 import heapq
+import copy
 
 import collections # for dequeue
 
@@ -327,7 +328,11 @@ def graph_search(problem, frontier):
     explored = set() # initial empty set of explored states
     while frontier:
         node = frontier.pop()
-        print(node.state)
+        # printout = copy.copy(problem.warehouse)
+        # printout.boxes = copy.copy(node.state.boxes)
+        # printout.worker = copy.copy(node.state.worker)
+        # print(printout)
+
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
