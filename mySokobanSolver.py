@@ -52,8 +52,11 @@ def my_team():
 actions_offset = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
 # Left, Right, Up, Down; v: vertical, h: horizontal
 
-def taboo_cells(warehouse, returnType = "str"):
+def taboo_cells_solver(warehouse):
     '''  
+
+    The solver for taboo cells puzzles.
+
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
     a cell inside a warehouse such that whenever a box get pushed on such 
     a cell then the puzzle becomes unsolvable. 
@@ -72,10 +75,7 @@ def taboo_cells(warehouse, returnType = "str"):
         a Warehouse object with the worker inside the warehouse
 
     @return
-       A string representing the warehouse with only the wall cells marked with 
-       a '#' and the taboo cells marked with a 'X'.  
-       The returned string should NOT have marks for the worker, the targets,
-       and the boxes.  
+       A list of tuple contains the coordinates of the cells identified as taboo cells. 
     '''
     taboo = []
     corner = []
@@ -150,18 +150,47 @@ def taboo_cells(warehouse, returnType = "str"):
             if continuous_taboo:
                 for cell_x in range(min(corner_a[0], corner_b[0]) + 1, max(corner_a[0], corner_b[0])):
                     taboo.append((cell_x, cell_y))
-                    
+
+    # deduplicate
+    return list(set(taboo))
+
+def taboo_cells(warehouse):
+    '''  
+
+    A wrapper for taboo cells solver, which returns a string representation.
+
+    Identify the taboo cells of a warehouse. A "taboo cell" is by definition
+    a cell inside a warehouse such that whenever a box get pushed on such 
+    a cell then the puzzle becomes unsolvable. 
+    
+    Cells outside the warehouse are not taboo. It is a fail to tag an 
+    outside cell as taboo.
+    
+    When determining the taboo cells, you must ignore all the existing boxes, 
+    only consider the walls and the target  cells.  
+    Use only the following rules to determine the taboo cells;
+     Rule 1: if a cell is a corner and not a target, then it is a taboo cell.
+     Rule 2: all the cells between two corners along a wall are taboo if none of 
+             these cells is a target.
+    
+    @param warehouse: 
+        a Warehouse object with the worker inside the warehouse
+
+    @return
+       A string representing the warehouse with only the wall cells marked with 
+       a '#' and the taboo cells marked with a 'X'.  
+       The returned string should NOT have marks for the worker, the targets,
+       and the boxes.  
+    '''
+    taboo = taboo_cells_solver(warehouse)
+    
     returned = str(warehouse).replace("$"," ").replace("."," ").replace("@"," ").replace("!"," ").replace("*"," ")
     returned = returned.split('\n')
     
     for cell in taboo:
         replace_str_2d(returned, cell, 'X')
     
-    if returnType == "str":
-        return '\n'.join(returned)
-    elif returnType == "list":
-        return taboo
-
+    return '\n'.join(returned)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -191,7 +220,7 @@ class SokobanPuzzle(search.Problem):
 
     def __init__(self, warehouse):
         self.initial = warehouse
-        self.taboo_cells = taboo_cells(warehouse, "list")
+        self.taboo_cells = taboo_cells_solver(warehouse) # FIXME: executes too many times
 
     def actions(self, state):
         """
@@ -231,7 +260,7 @@ class SokobanPuzzle(search.Problem):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        next_state = copy.copy(state)
+        next_state = copy.copy(state)# HACK?
         (x,y) = state.worker
         if action == 'Left':
             next_state.worker = (x-1,y)
