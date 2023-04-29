@@ -208,13 +208,13 @@ class State:
     '''
     def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None, f: Callable[[],int] = None) -> None:
         self.worker = worker
-        self.boxes = boxes
+        self.boxes = copy.copy(boxes)
         self.f = f
 
     def copy(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None):
         clone = State()
         clone.worker = worker or self.worker # tuple is immutable
-        clone.boxes = copy.copy(boxes) or self.boxes # array is mutable, again, tuple is immutable
+        clone.boxes = copy.copy(boxes) or copy.copy(self.boxes) # array is mutable, again, tuple is immutable
         clone.f = self.f
         return clone
 
