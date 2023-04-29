@@ -32,13 +32,15 @@ Last modified by 2022-03-27  by f.maire@qut.edu.au
 import itertools
 import search 
 import sokoban
-import copy
 
+from typing import List
+import operator
+import functools
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def my_team():
+def my_team() -> List(int, str, str):
     '''
     Return the list of the team members of this assignment submission as a list
     of triplet of the form (student_number, first_name, last_name)
@@ -52,7 +54,7 @@ def my_team():
 actions_offset = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
 # Left, Right, Up, Down; v: vertical, h: horizontal
 
-def taboo_cells_solver(warehouse):
+def taboo_cells_solver(warehouse: sokoban.Warehouse) -> List(tuple):
     '''  
 
     The solver for taboo cells puzzles.
@@ -154,7 +156,7 @@ def taboo_cells_solver(warehouse):
     # deduplicate
     return list(set(taboo))
 
-def taboo_cells(warehouse):
+def taboo_cells(warehouse: sokoban.Warehouse) -> str:
     '''  
 
     A wrapper for taboo cells solver, which returns a string representation.
@@ -194,6 +196,28 @@ def taboo_cells(warehouse):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+class State:
+    '''
+    An instance of the class 'State' represents a state of a Sokoban puzzle.
+    '''
+    def __init__(self, worker = None, boxes = None) -> None:
+        self.worker = worker
+        self.boxes = boxes
+    
+    def copy(self, worker = None, boxes = None):
+        clone = State()
+        clone.worker = worker or self.worker
+        clone.boxes = boxes or self.boxes
+        return clone
+    
+    def __lt__(self, node):
+        raise NotImplementedError()
+    
+    def __eq__(self, other) -> bool:
+        return self.worker == other.worker and self.boxes == other.boxes # FIXME
+    
+    def __hash__(self):
+        return hash(self.worker) ^ functools.reduce(operator.xor, [hash(box) for box in self.boxes])
 
 class SokobanPuzzle(search.Problem):
     '''
@@ -205,46 +229,48 @@ class SokobanPuzzle(search.Problem):
     the provided module 'search.py'. 
     
     '''
-    
-    #
-    #         "INSERT YOUR CODE HERE"
-    #
-    #     Revisit the sliding puzzle and the pancake puzzle for inspiration!
-    #
-    #     Note that you will need to add several functions to 
-    #     complete this class. For example, a 'result' method is needed
-    #     to satisfy the interface of 'search.Problem'.
-    #
-    #     You are allowed (and encouraged) to use auxiliary functions and classes
 
+    def __init__(self, warehouse: sokoban.Warehouse) -> None:
+        self.warehouse = warehouse.copy()
+        self.initial = State(worker=warehouse.worker, boxes=warehouse.boxes)
+        self.taboo_cells = taboo_cells_solver(warehouse)
+        self.weights = warehouse.weights
+        self.targets = warehouse.targets
+        self.walls = warehouse.walls
+        self.ncols = warehouse.ncols
+        self.nrows = warehouse.nrows
 
-    def __init__(self, warehouse):
-        self.initial = warehouse
-        self.taboo_cells = taboo_cells_solver(warehouse) # FIXME: executes too many times
-
-    def actions(self, state):
+    def actions(self, state: State) -> List[str]:
         """
         Return the list of actions that can be executed in the given state.
+
+        Each action consists of a direction and a box index.
         
         """
-        acts=['Up','Left','Down','Right']
-        (x,y) = state.worker
-        if (x - 1 , y) in state.walls or ((x-1 , y) in state.boxes and (x - 2,y) in state.walls + state.boxes + self.taboo_cells):
-            acts.remove('Left')
-        if (x + 1 , y) in state.walls or ((x+1 , y) in state.boxes and (x +2,y) in state.walls + state.boxes + self.taboo_cells):
-            acts.remove('Right')
-        if (x , y-1) in state.walls or ((x , y-1) in state.boxes and (x,y-2) in state.walls + state.boxes + self.taboo_cells):
-            acts.remove('Up')
-        if (x , y+1) in state.walls or ((x , y+1) in state.boxes and (x,y+2) in state.walls + state.boxes + self.taboo_cells):
-            acts.remove('Down')
-        return acts
+
+        for box in state.boxes:
+            # if box in self.warehouse.targets:
+            #     continue
+            # Skip if box is on a target
+        
+            moves = {'Left' :(-1,0), 'Right':(1,0) , 'Up':(0,-1), 'Down':(0,1)} # (x,y) = (column,row)
+            for name in moves:
+                (x,y) = state.box
+                (dx,dy) = moves[name]
+                if (x+dx,y+dy) in self.walls:
+                    moves.pop(name)
+                if (x+dx,y+dy) in state.boxes:
+                    if (x+2*dx,y+2*dy) in self.taboo_cells + self.walls + state.boxes:
+                        moves.pop(name)
+        
+        return moves
     
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
         method if checking against a single self.goal is not enough."""
         for box in state.boxes:
-            if box not in state.targets:
+            if box not in self.targets:
                 return False
         return True
     
@@ -254,12 +280,14 @@ class SokobanPuzzle(search.Problem):
         is such that the path doesn't matter, this function will only look at
         state2.  If the path does matter, it will consider c and maybe state1
         and action. The default method costs 1 for every step in the path."""
-        return c + 1
+        return c + 1 # TODO: implement this
     
     def result(self, state, action):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
+        assert action in self.actions(state)
+        next_box, next_worker = None, None
         next_state = copy.copy(state)# HACK?
         (x,y) = state.worker
         if action == 'Left':
@@ -283,7 +311,15 @@ class SokobanPuzzle(search.Problem):
             for index, (boxX, boxY) in  enumerate(state.boxes):
                 if (boxX, boxY) == next_state.worker:
                     next_state.boxes[index] =(boxX +1 , boxY)
+        
+
+        next_state = State()
         return next_state
+    
+    def value(self, state):
+        """For optimization problems, each state has a value.  Hill-climbing
+        and related algorithms try to maximize this value."""
+        return 0
     
     def h(self, n):
         #to be done
