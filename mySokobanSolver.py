@@ -248,7 +248,6 @@ class State:
             return str({'worker': self.worker, 'boxes': self.boxes})
         return str({'worker': self.worker, 'boxes': self.boxes, 'f': self.f(self)})
 
-
 def manhattan_distance(a: tuple[int, int], b: tuple[int, int]) -> int:
     '''
     Calculate the Manhattan distance between two points.
@@ -317,28 +316,32 @@ class SokobanPuzzle(search.Problem):
         self.ncols = warehouse.ncols
         self.nrows = warehouse.nrows
 
-    def actions(self, state: State) -> list[str]:
+    def actions(self, state: State) -> list[tuple[int, str]]:
         """
         Return the list of boxes' actions that can be executed in the given state.
 
         Each action consists of a direction and a box index.
 
         """
-        raise NotImplementedError()
-        for box in state.boxes:
-            # if box in self.warehouse.targets:
+
+        all_moves = []
+
+        for idx, box in enumerate(state.boxes):
+            # if box in self.targets:
             #     continue
             # Skip if box is on a target
 
             moves = copy.copy(_moves)
             for name in _moves:
-                (x, y) = state.box
-                (dx, dy) = moves[name]
+                (x, y) = box
+                (dx, dy) = _moves[name]
                 if (x+dx, y+dy) in self.walls:
                     moves.pop(name)
                 if (x+dx, y+dy) in state.boxes:
                     if (x+2*dx, y+2*dy) in self.taboo_cells + self.walls + state.boxes:
                         moves.pop(name)
+
+            all_moves.extend([(idx, name) for name in moves])
 
         return moves
 
@@ -357,31 +360,14 @@ class SokobanPuzzle(search.Problem):
         is such that the path doesn't matter, this function will only look at
         state2.  If the path does matter, it will consider c and maybe state1
         and action. The default method costs 1 for every step in the path."""
-        assert action in self.actions(state1)
-        (x, y) = state1.worker
-        if action == 'Left':
-            for index, (boxX, boxY) in enumerate(state1.boxes):
-                if (boxX, boxY) == (x-1, y):
-                    c += self.weights[index]
-        elif action == 'Up':
-            for index, (boxX, boxY) in enumerate(state1.boxes):
-                if (boxX, boxY) == (x, y-1):
-                    c += self.weights[index]
-        elif action == 'Down':
-            for index, (boxX, boxY) in enumerate(state1.boxes):
-                if (boxX, boxY) == (x, y+1):
-                    c += self.weights[index]
-        elif action == 'Right':
-            for index, (boxX, boxY) in enumerate(state1.boxes):
-                if (boxX, boxY) == (x+1, y):
-                    c += self.weights[index]
-        return c + 1
         raise NotImplementedError()
+        
 
     def result(self, state: State, action: str) -> State:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
+        raise NotImplementedError()
         assert action in self.actions(state)
         next_box, next_worker = None, None
         next_state = copy.copy(state)  # HACK?
@@ -410,32 +396,40 @@ class SokobanPuzzle(search.Problem):
 
         next_state = State()
         return next_state
-        raise NotImplementedError()
 
     def value(self, state: State) -> int:
         """For optimization problems, each state has a value.  Hill-climbing
         and related algorithms try to maximize this value."""
-        return 0
         raise NotImplementedError()
+        return 0
 
-    def print_solution(self, goal_node):
+    def parse_goal_node(goal_node: search.Node) -> tuple[list[str], int]:
         """
-            Shows solution represented by a specific goal node.
+            Export solution represented by a specific goal node.
             For example, goal node could be obtained by calling 
                 goal_node = breadth_first_tree_search(problem)
         """
         # path is list of nodes from initial state (root of the tree)
         # to the goal_node
-        path = goal_node.path()
-        # print the solution
-        print("Solution takes {0} steps from the initial state".format(
-            len(path)-1))
-        print("Solution takes {0} cost from the initial state".format(
-            goal_node.path_cost))
+        answer = []
+        cost = goal_node.path_cost
+        for node in goal_node.path():
+            if node.action is not None:
+                answer.append(node.action)
+        return answer, cost
 
+    def print_solution(goal_node: search.Node) -> None:
+
+        path = goal_node.path()
+        # print the solution for debug purpose
+        print(f"Solution takes {len(path)-1} steps from the initial state")
+        print(f"Solution takes {goal_node.path_cost} cost from the initial state")
+
+        print()
         print(path[0].state)
-        print("to the goal state")
+        print("to")
         print(path[-1].state)
+        print()
         print("\nBelow is the sequence of moves\n")
         for node in path:
             if node.action is not None:
@@ -447,14 +441,12 @@ class SokobanPuzzle(search.Problem):
         Heuristic for goal state. 
         h(n) = ?
         '''
-        return 0
         raise NotImplementedError()
+        return 0
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):
-    def __init__(self, warehouse: sokoban.Warehouse) -> None:
-        super().__init__(warehouse)
-
+    # Only for check_elem_action_seq and BFS test
     def actions(self, state: State) -> list[str]:
         """
         Return the list of worker's actions that can be executed in the given state.
@@ -475,6 +467,27 @@ class SokobanPuzzleWorker(SokobanPuzzle):
                     moves.pop(name)
 
         return moves
+    
+    def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
+        assert action in self.actions(state1)
+        (x, y) = state1.worker
+        if action == 'Left':
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x-1, y):
+                    c += self.weights[index]
+        elif action == 'Up':
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x, y-1):
+                    c += self.weights[index]
+        elif action == 'Down':
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x, y+1):
+                    c += self.weights[index]
+        elif action == 'Right':
+            for index, (boxX, boxY) in enumerate(state1.boxes):
+                if (boxX, boxY) == (x+1, y):
+                    c += self.weights[index]
+        return c + 1
 
     def result(self, state: State, action: str) -> State:
         """Return the state that results from executing the given
@@ -488,19 +501,6 @@ class SokobanPuzzleWorker(SokobanPuzzle):
             if (box_x, box_y) == next_state.worker:
                 next_state.boxes[index] = (box_x + dx, box_y + dy)
         return next_state
-
-    def goal_test(self, state: State) -> bool:
-        return super().goal_test(state)
-
-    def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
-        return super().path_cost(c, state1, action, state2)
-
-    def value(self, state: State) -> int:
-        return super().value(state)
-
-    def h(self, state: State) -> int:
-        return super().h(state)
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -565,12 +565,14 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
             C is the total cost of the action sequence C
 
     '''
-    problem = SokobanPuzzleWorker(warehouse)
+    mode = 'bfs'
 
-    sol_ts = search.breadth_first_graph_search(problem)  # graph search version
-    problem.print_solution(sol_ts)
-    return sol_ts,
-    # raise NotImplementedError()
+    if mode == 'bfs':
+        problem = SokobanPuzzleWorker(warehouse)
+
+        goal_node = search.breadth_first_graph_search(problem)
+        SokobanPuzzleWorker.print_solution(goal_node)
+        return SokobanPuzzleWorker.parse_goal_node(goal_node)
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -342,7 +342,7 @@ file_menu.add_command(label ='Quit', command = root_window.destroy)
 # Adding File Solve Menu and commands
 solve_menu = tk.Menu(menubar, tearoff = 0)
 menubar.add_cascade(label ='Solve', menu = solve_menu)
-solve_menu.add_command(label ='Plan action sequence', command = solve_puzzle)
+solve_menu.add_command(label ='solve puzzle', command = solve_puzzle)
 solve_menu.add_command(label ='Play action sequence', command = play_solution)
 
 
