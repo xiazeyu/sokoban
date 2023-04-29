@@ -32,6 +32,7 @@ Last modified by 2022-03-27  by f.maire@qut.edu.au
 import itertools
 import search 
 import sokoban
+import copy
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -230,29 +231,29 @@ class SokobanPuzzle(search.Problem):
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
+        next_state = copy.copy(state)
         (x,y) = state.worker
         if action == 'Left':
-            state.worker = (x-1,y)
+            next_state.worker = (x-1,y)
             for index, (boxX, boxY) in  enumerate(state.boxes):
                 if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX -1 , boxY)
+                    next_state.boxes[index] =(boxX -1 , boxY)
         elif action == 'Up':
-            state.worker = (x,y-1)  
+            next_state.worker = (x,y-1)  
             for index, (boxX, boxY) in  enumerate(state.boxes):
                 if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX, boxY-1)
+                    next_state.boxes[index] =(boxX, boxY-1)
         elif action == 'Down':
-            state.worker = (x,y+1)
+            next_state.worker = (x,y+1)
             for index, (boxX, boxY) in  enumerate(state.boxes):
                 if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX , boxY+1)
+                    next_state.boxes[index] =(boxX , boxY+1)
         elif action == 'Right':
-            state.worker =(x+1,y)
+            next_state.worker =(x+1,y)
             for index, (boxX, boxY) in  enumerate(state.boxes):
                 if (boxX, boxY) == state.worker:
-                    state.boxes[index] =(boxX +1 , boxY)
-
-        return state
+                    next_state.boxes[index] =(boxX +1 , boxY)
+        return next_state
     
     def h(self, n):
         #to be done
