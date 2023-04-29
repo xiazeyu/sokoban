@@ -385,6 +385,17 @@ class SokobanPuzzle(search.Problem):
         '''
         return 0
         raise NotImplementedError()
+    
+class SokabanPuzzleWorker(SokobanPuzzle):
+    def __init__(self, warehouse: sokoban.Warehouse) -> None:
+        super().__init__(warehouse)
+
+    def actions(self, state: State) -> list[str]:
+        super().actions_worker(state)
+    
+    def result(self, state: State, action: str) -> State:
+        super().result_worker(state, action)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
