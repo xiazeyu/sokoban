@@ -33,14 +33,20 @@ import itertools
 import search 
 import sokoban
 
-from typing import List
+from typing import Callable
 import operator
 import functools
+import copy
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+actions_offset: list[list[int, int, str]] = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
+_moves: dict[tuple[int, int]] = {'Left' :(-1,0), 'Right':(1,0) , 'Up':(0,-1), 'Down':(0,1)} # (x,y) = (column,row)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def my_team() -> List(int, str, str):
+def my_team() -> list[tuple[int, str, str]]:
     '''
     Return the list of the team members of this assignment submission as a list
     of triplet of the form (student_number, first_name, last_name)
@@ -51,10 +57,9 @@ def my_team() -> List(int, str, str):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-actions_offset = [[-1,0,'h'], [1,0,'h'], [0,-1,'v'], [0,1,'v']]
 # Left, Right, Up, Down; v: vertical, h: horizontal
 
-def taboo_cells_solver(warehouse: sokoban.Warehouse) -> List(tuple):
+def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
     '''  
 
     The solver for taboo cells puzzles.
@@ -79,10 +84,11 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> List(tuple):
     @return
        A list of tuple contains the coordinates of the cells identified as taboo cells. 
     '''
-    taboo = []
-    corner = []
-    exploded = []
-    frontier = [warehouse.worker]
+
+    taboo: list[tuple[int, int]] = []
+    corner: list[tuple[int, int]] = []
+    exploded: list[tuple[int, int]] = []
+    frontier: list[tuple[int, int]] = [warehouse.worker]
 
     while frontier:
         current = frontier[0]
@@ -200,27 +206,41 @@ class State:
     '''
     An instance of the class 'State' represents a state of a Sokoban puzzle.
     '''
-    def __init__(self, worker = None, boxes = None) -> None:
+    def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None, f: Callable[[],int] = None) -> None:
         self.worker = worker
         self.boxes = boxes
-    
-    def copy(self, worker = None, boxes = None):
+        self.f = f
+
+    def copy(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None):
         clone = State()
-        clone.worker = worker or self.worker
-        clone.boxes = boxes or self.boxes
+        clone.worker = worker or self.worker # tuple is immutable
+        clone.boxes = copy.copy(boxes) or self.boxes # array is mutable, again, tuple is immutable
+        clone.f = self.f
         return clone
-    
-    def __lt__(self, node):
-        raise NotImplementedError()
-    
+
     def __eq__(self, other) -> bool:
-        return self.worker == other.worker and self.boxes == other.boxes # FIXME
+        if self.worker != other.worker:
+            return False
+
+        for a, b in zip(self.boxes, other.boxes):
+            if a != b:
+                return False
+
+        return True
     
-    def __hash__(self):
+    def __lt__(self, other) -> bool:
+        if self.f == None:
+            raise RuntimeError("f is not defined in State")
+        return self.f < other.f
+
+    def __hash__(self) -> int:
         return hash(self.worker) ^ functools.reduce(operator.xor, [hash(box) for box in self.boxes])
 
 class SokobanPuzzle(search.Problem):
     '''
+
+    This class defines the action by the boxes, not the worker.
+
     An instance of the class 'SokobanPuzzle' represents a Sokoban puzzle.
     An instance contains information about the walls, the targets, the boxes
     and the worker.
@@ -240,21 +260,42 @@ class SokobanPuzzle(search.Problem):
         self.ncols = warehouse.ncols
         self.nrows = warehouse.nrows
 
-    def actions(self, state: State) -> List[str]:
+    def actions_worker(self, state: State) -> list[str]:
         """
-        Return the list of actions that can be executed in the given state.
+        Return the list of worker's actions that can be executed in the given state.
+
+        NOTE: this action DID NOT filter out the actions that will lead to a taboo state.
 
         Each action consists of a direction and a box index.
         
         """
+        moves = copy.copy(_moves)
+        for name in _moves:
+            (x,y) = state.worker
+            (dx,dy) = moves[name]
+            if (x+dx,y+dy) in self.walls:
+                moves.pop(name)
+            if (x+dx,y+dy) in state.boxes:
+                if (x+2*dx,y+2*dy) in self.walls + state.boxes:
+                    moves.pop(name)
+        
+        return moves
 
+    def actions(self, state: State) -> list[str]:
+        """
+        Return the list of boxes' actions that can be executed in the given state.
+
+        Each action consists of a direction and a box index.
+        
+        """
+        raise NotImplementedError()
         for box in state.boxes:
             # if box in self.warehouse.targets:
             #     continue
             # Skip if box is on a target
         
-            moves = {'Left' :(-1,0), 'Right':(1,0) , 'Up':(0,-1), 'Down':(0,1)} # (x,y) = (column,row)
-            for name in moves:
+            moves = copy.copy(_moves)
+            for name in _moves:
                 (x,y) = state.box
                 (dx,dy) = moves[name]
                 if (x+dx,y+dy) in self.walls:
@@ -265,7 +306,7 @@ class SokobanPuzzle(search.Problem):
         
         return moves
     
-    def goal_test(self, state):
+    def goal_test(self, state: State) -> bool:
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
         method if checking against a single self.goal is not enough."""
@@ -274,15 +315,16 @@ class SokobanPuzzle(search.Problem):
                 return False
         return True
     
-    def path_cost(self, c, state1, action, state2):
+    def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
         """Return the cost of a solution path that arrives at state2 from
         state1 via action, assuming cost c to get up to state1. If the problem
         is such that the path doesn't matter, this function will only look at
         state2.  If the path does matter, it will consider c and maybe state1
         and action. The default method costs 1 for every step in the path."""
-        return c + 1 # TODO: implement this
+        return c + 1
+        raise NotImplementedError()
     
-    def result(self, state, action):
+    def result(self, state: State, action: str) -> State:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
@@ -311,26 +353,42 @@ class SokobanPuzzle(search.Problem):
             for index, (boxX, boxY) in  enumerate(state.boxes):
                 if (boxX, boxY) == next_state.worker:
                     next_state.boxes[index] =(boxX +1 , boxY)
-        
 
         next_state = State()
         return next_state
+        raise NotImplementedError()
+
+    def result_worker(self, state: State, action: str) -> State:
+        """Return the state that results from executing the given
+        action in the given state. The action must be one of
+        self.actions_worker(state)."""
+        assert action in self.actions_worker(state)
+        x,y = state.worker
+        dx, dy = _moves[action]
+        next_state = state.copy(worker=(x+dx, y+dy))
+        for index, (box_x, box_y) in enumerate(state.boxes):
+            if (box_x, box_y) == next_state.worker:
+                next_state.boxes[index] = (box_x + dx , box_y + dy)
+        return next_state
     
-    def value(self, state):
+    def value(self, state: State) -> int:
         """For optimization problems, each state has a value.  Hill-climbing
         and related algorithms try to maximize this value."""
         return 0
+        raise NotImplementedError()
+
     
-    def h(self, n):
-        #to be done
+    def h(self, state: State) -> int:
+        '''
+        Heuristic for goal state. 
+        h(n) = ?
+        '''
         return 0
-    
-    
-        
+        raise NotImplementedError()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def check_elem_action_seq(warehouse, action_seq):
+def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]):
     '''
     
     Determine if the sequence of actions listed in 'action_seq' is legal or not.
@@ -353,25 +411,22 @@ def check_elem_action_seq(warehouse, action_seq):
                the sequence of actions.  This must be the same string as the
                string returned by the method  Warehouse.__str__()
     '''
-    
-    ##         "INSERT YOUR CODE HERE"
-    
 
     problem = SokobanPuzzle(warehouse)
-    currentNode = search.Node(problem.initial)
+    state = problem.initial
 
-    for planedAct in action_seq :
-        if planedAct in problem.actions(currentNode.state):
-            currentNode = currentNode.child_node(problem, planedAct)
+    for planed_act in action_seq :
+        if planed_act in problem.actions_worker(state):
+            state = problem.result_worker(state, planed_act)
         else:
             return "Impossible"
         
-    return (currentNode.state.__str__())
+    return warehouse.copy(worker=state.worker, boxes=state.boxes).__str__()
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def solve_weighted_sokoban(warehouse):
+def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
     '''
     This function analyses the given warehouse.
     It returns the two items. The first item is an action sequence solution. 
@@ -404,7 +459,7 @@ def solve_weighted_sokoban(warehouse):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def replace_str_index(text, index, replacement):
+def replace_str_index(text: str, index: int, replacement: str):
     '''
     Repace the string with a char at given index.
 
@@ -425,7 +480,7 @@ def replace_str_index(text, index, replacement):
     '''
     return f'{text[:index]}{replacement}{text[index+1:]}'
 
-def replace_str_2d(text, index, replacement):
+def replace_str_2d(text: str, index: int, replacement: str):
     '''
     Replace the string (in 2D addressing mode) with given char.
     Index starts at (0, 0).
