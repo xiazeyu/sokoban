@@ -33,6 +33,7 @@ import itertools
 import functools
 import heapq
 import copy
+from typing import Callable
 
 import collections # for dequeue
 
@@ -401,7 +402,7 @@ def best_first_tree_search(problem, f):
 
 
 
-def best_first_graph_search(problem, f):
+def best_first_graph_search(problem: Problem, f: Callable[[Node], int]):
     """
     Search the nodes with the lowest f scores first.
     You specify the function f(node) that you want to minimize; for example,
@@ -475,7 +476,7 @@ def iterative_deepening_search(problem):
 greedy_best_first_graph_search = best_first_graph_search
 # Greedy best-first search is accomplished by specifying f(n) = h(n).
 
-def astar_graph_search(problem, h=None):
+def astar_graph_search(problem: Problem, h: Callable[[Node], int]=None):
     """A* search is best-first graph search with f(n) = g(n)+h(n).
     You need to specify the h function when you call astar_search, or
     else in your Problem subclass."""
