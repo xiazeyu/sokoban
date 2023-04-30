@@ -380,6 +380,9 @@ class SokobanPuzzle(search.Problem):
         # path is list of nodes from initial state (root of the tree)
         # to the goal_node
         answer = []
+        if goal_node is None:
+            return 'Impossible'
+
         cost = goal_node.path_cost
         for node in goal_node.path():
             if node.action is not None:
@@ -512,6 +515,43 @@ class SokobanPuzzleWorker(SokobanPuzzle):
                 next_state.boxes[index] = (box_x + dx, box_y + dy)
         return next_state
     
+    def parse_goal_node(goal_node: search.Node) -> tuple[list[str], int]:
+        """
+            Export solution represented by a specific goal node.
+            For example, goal node could be obtained by calling 
+                goal_node = breadth_first_tree_search(problem)
+        """
+        # path is list of nodes from initial state (root of the tree)
+        # to the goal_node
+        answer = []
+        if goal_node is None:
+            return 'Impossible'
+
+        cost = goal_node.path_cost
+        for node in goal_node.path():
+            if node.action is not None:
+                answer.append(node.action)
+        return answer, cost
+
+    def print_solution(goal_node: search.Node) -> None:
+
+        path = goal_node.path()
+        # print the solution for debug purpose
+        print(f"Solution takes {len(path)-1} steps from the initial state")
+        print(
+            f"Solution takes {goal_node.path_cost} cost from the initial state")
+
+        print()
+        print(path[0].state)
+        print("to")
+        print(path[-1].state)
+        print()
+        print("\nBelow is the sequence of moves\n")
+        for node in path:
+            if node.action is not None:
+                print("move to {0}".format(node.action))
+            print(node.state)
+
     def h(self, node: search.Node) -> int:
         '''
         Heuristic for goal state. 
@@ -636,7 +676,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         goal_node = search.breadth_first_graph_search(problem)
         t1 = time.time()
         print('BFSBox Solver took {:.6f} seconds'.format(t1-t0))
-        SokobanPuzzle.print_solution(goal_node)
+        #SokobanPuzzle.print_solution(goal_node)
         return SokobanPuzzle.parse_goal_node(goal_node)
 
     if mode == 'astar_box':
@@ -645,7 +685,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         goal_node = search.astar_graph_search(problem)
         t1 = time.time()
         print('A*Box Solver took {:.6f} seconds'.format(t1-t0))
-        SokobanPuzzle.print_solution(goal_node)
+        #SokobanPuzzle.print_solution(goal_node)
         return SokobanPuzzle.parse_goal_node(goal_node)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
