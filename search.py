@@ -126,9 +126,7 @@ class PriorityQueue:
 
     def append(self, item):
         """Insert item at its correct position."""
-
-        print(f'PriorityQueue.append: ({self.f(item)}, {item})')
-
+        #print(f'PriorityQueue.append: ({self.f(item)}, {item})')
         heapq.heappush(self.heap, (self.f(item), item))
 
     def extend(self, items):
@@ -330,7 +328,8 @@ def graph_search(problem, frontier):
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
-            return node
+            print(f'Goal reached{node.path_cost}')
+            # return node
         explored.add(node.state)
         # Python note: next line uses of a generator
         frontier.extend(child for child in node.expand(problem)
@@ -409,7 +408,7 @@ def best_first_graph_search(problem: Problem, f: Callable[[Node], int]):
     frontier.append(node)
     explored = set() # set of states
     while frontier:
-        node = frontier.pop()
+        node: Node = frontier.pop()
         print(f'best_first_graph_search: frontier.pop({node.state})')
         if problem.goal_test(node.state):
             return node
