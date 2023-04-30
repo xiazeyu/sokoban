@@ -37,6 +37,7 @@ import functools
 import operator
 import copy
 import math
+import time
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -441,8 +442,33 @@ class SokobanPuzzle(search.Problem):
         Heuristic for goal state. 
         h(n) = ?
         '''
-        raise NotImplementedError()
-        return 0
+        state = node.state
+        costs = [0]
+        tempCombination = {}
+        for targetX, targetY in self.targets:
+            for index, (boxX,boxY) in  enumerate(state.boxes):
+                tempCombination[(targetX, targetY),(boxX,boxY) ] = (abs(targetX - boxX) + abs(targetY - boxY)) * self.weights[index]
+        print(tempCombination)
+        Combinations = [[]]
+        for i in range(len(self.targets) -1) :
+            for (target, box) in tempCombination.keys():
+                placed = False
+                for index, combinationList in  enumerate(Combinations):
+                    Found = False
+                    for (CombinationTarget,CombinationBox) in combinationList:
+                        if  target == CombinationTarget or box == CombinationBox:
+                            Found = True
+                            break
+                    if not Found:
+                        Combinations[index].append((target, box))
+                        costs[index] += tempCombination[(target, box)]
+                        placed = True
+                        break
+                            
+                if not placed:
+                    Combinations.append([(target,box)]) 
+                    costs.append(tempCombination[(target, box)])
+        return min(costs)
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):
@@ -570,7 +596,10 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
     if mode == 'bfs':
         problem = SokobanPuzzleWorker(warehouse)
 
-        goal_node = search.breadth_first_graph_search(problem)
+        t0 = time.time()
+        goal_node = search.astar_graph_search(problem)
+        t1 = time.time()
+        print ('A* Solver took {:.6f} seconds'.format(t1-t0))
         SokobanPuzzleWorker.print_solution(goal_node)
         return SokobanPuzzleWorker.parse_goal_node(goal_node)
 

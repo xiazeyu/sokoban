@@ -126,7 +126,10 @@ class PriorityQueue:
 
     def append(self, item):
         """Insert item at its correct position."""
-        heapq.heappush(self.heap, (self.f(item), item))
+        print(self.f(item))
+        print(item)
+
+        heapq.heappush(self.heap, (int(self.f(item)), item))
 
     def extend(self, items):
         """Insert each item in items at its correct position."""
@@ -241,7 +244,7 @@ class Node:
         return "<Node {}>".format(self.state)
 
     def __lt__(self, node):
-        return self.state < node.state
+        return False
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
