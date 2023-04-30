@@ -363,7 +363,6 @@ class SokobanPuzzle(search.Problem):
         """For optimization problems, each state has a value.  Hill-climbing
         and related algorithms try to maximize this value."""
         raise NotImplementedError()
-        return 0
 
     def parse_goal_node(goal_node: search.Node) -> tuple[list[str], int]:
         """
