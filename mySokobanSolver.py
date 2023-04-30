@@ -603,18 +603,43 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
             C is the total cost of the action sequence C
 
     '''
-    mode = 'bfs'
+    mode = 'bfs_box'
 
-    if mode == 'bfs':
+    if mode == 'bfs_worker':
         problem = SokobanPuzzleWorker(warehouse)
-
         t0 = time.time()
-        goal_node = search.astar_graph_search(problem)
+        goal_node = search.breadth_first_graph_search(problem)
         t1 = time.time()
-        print('A* Solver took {:.6f} seconds'.format(t1-t0))
+        print('BFSWorker Solver took {:.6f} seconds'.format(t1-t0))
         SokobanPuzzleWorker.print_solution(goal_node)
         return SokobanPuzzleWorker.parse_goal_node(goal_node)
 
+    elif mode == 'astar_worker':
+        problem = SokobanPuzzleWorker(warehouse)
+        t0 = time.time()
+        goal_node = search.astar_graph_search(problem)
+        t1 = time.time()
+        print('A*Worker Solver took {:.6f} seconds'.format(t1-t0))
+        SokobanPuzzleWorker.print_solution(goal_node)
+        return SokobanPuzzleWorker.parse_goal_node(goal_node)
+
+    if mode == 'bfs_box':
+        problem = SokobanPuzzle(warehouse)
+        t0 = time.time()
+        goal_node = search.breadth_first_graph_search(problem)
+        t1 = time.time()
+        print('BFSBox Solver took {:.6f} seconds'.format(t1-t0))
+        SokobanPuzzleWorker.print_solution(goal_node)
+        return SokobanPuzzleWorker.parse_goal_node(goal_node)
+
+    if mode == 'astar_box':
+        problem = SokobanPuzzle(warehouse)
+        t0 = time.time()
+        goal_node = search.breadth_first_graph_search(problem)
+        t1 = time.time()
+        print('A*Box Solver took {:.6f} seconds'.format(t1-t0))
+        SokobanPuzzleWorker.print_solution(goal_node)
+        return SokobanPuzzleWorker.parse_goal_node(goal_node)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
