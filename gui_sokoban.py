@@ -257,9 +257,9 @@ def move_player(direction):
     clean_cell(next_x,next_y)
     # Test whether the appearance of the player need to change on the next cell
     if (next_x,next_y) in warehouse.targets:
-        cells[(next_x,next_y)] = make_cell('worker_on_target', pos=(x,y))
+        cells[(next_x,next_y)] = make_cell('worker_on_target', pos=(next_x,next_y))
     else:
-        cells[(next_x,next_y)] = make_cell('worker', pos=(x,y))
+        cells[(next_x,next_y)] = make_cell('worker', pos=(next_x,next_y))
     cells[(next_x,next_y)].grid(row=next_y,column=next_x) # move it to the next cell
     warehouse.worker = (next_x,next_y)
     # update the cell where the player was
@@ -299,9 +299,9 @@ def try_move_box(location, next_location):
             clean_cell(next_x,next_y)
         # new widget for the moved box
         if (next_x,next_y) in warehouse.targets:
-            cells[(next_x,next_y)] = make_cell('box_on_target', get_box_weight(x,y), pos=(x,y))            
+            cells[(next_x,next_y)] = make_cell('box_on_target', get_box_weight(x,y), pos=(next_x,next_y))            
         else:
-            cells[(next_x,next_y)] = make_cell('box',  get_box_weight(x,y), pos=(x,y)) 
+            cells[(next_x,next_y)] = make_cell('box',  get_box_weight(x,y), pos=(next_x,next_y)) 
         cells[(next_x,next_y)].grid(row=next_y, column=next_x)
         # we have to preserve the position of the box in the list boxes
         bi = warehouse.boxes.index((x,y))
