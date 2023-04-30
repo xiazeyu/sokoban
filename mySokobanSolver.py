@@ -436,7 +436,7 @@ class SokobanPuzzle(search.Problem):
                 print("move to {0}".format(node.action))
             print(node.state)
 
-    def h(self, state: State) -> int:
+    def h(self, node: search.Node) -> int:
         '''
         Heuristic for goal state. 
         h(n) = ?
