@@ -93,8 +93,46 @@ def get_box_weight(x,y):
     return w
 
 #----------------------------------------------------------------------------
+class ToolTip(object):
 
-def make_cell(cell_type, box_weight = None):
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+
+    def showtip(self, text):
+        "Display text in tooltip window"
+        self.text = text
+        if self.tipwindow or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 57
+        y = y + cy + self.widget.winfo_rooty() +27
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(tw, text=self.text, justify=tk.LEFT,
+                      background="#ffffe0", relief=tk.SOLID, borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+def CreateToolTip(widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(text)
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind('<Enter>', enter)
+    widget.bind('<Leave>', leave)
+
+def make_cell(cell_type, box_weight = None, pos = None):
     '''
     Create a canvas for a cell of the warehouse
     Return a painted canvas
@@ -110,6 +148,9 @@ def make_cell(cell_type, box_weight = None):
     if box_weight != None:
         canvas.create_text(25, 25, text= str(box_weight),
                        fill="black",font=('Helvetica 15 bold'))
+    if pos != None:
+        canvas.create_text(25, 25, text= str(pos),
+                       fill="blue",font=('Helvetica 15 bold'))
     return canvas
 
 #----------------------------------------------------------------------------
@@ -171,25 +212,25 @@ def fresh_display():
     Setup the cells dictionary
     '''
     for x,y in warehouse.walls:
-        cells[(x,y)] = make_cell('wall')
+        cells[(x,y)] = make_cell('wall', pos=(x,y))
         cells[(x,y)].grid(row=y,column=x)
     for x,y in warehouse.targets:
-        cells[(x,y)] = make_cell('target')
+        cells[(x,y)] = make_cell('target', pos=(x,y))
         cells[(x,y)].grid(row=y,column=x)
     for x,y in warehouse.boxes:
         if (x,y) in warehouse.targets:
             clean_cell(x,y)
-            cells[(x,y)] = make_cell('box_on_target', get_box_weight(x, y))      
+            cells[(x,y)] = make_cell('box_on_target', get_box_weight(x, y), pos=(x,y))      
             cells[(x,y)].grid(row=y,column=x)
         else:
-            cells[(x,y)] = make_cell('box', get_box_weight(x,y))      
+            cells[(x,y)] = make_cell('box', get_box_weight(x,y), pos=(x,y))      
             cells[(x,y)].grid(row=y,column=x)
     x,y = warehouse.worker
     if (x,y) in warehouse.targets:
         cells[(x,y)].destroy() 
-        cells[(x,y)] = make_cell('worker_on_target')      
+        cells[(x,y)] = make_cell('worker_on_target', pos=(x,y))      
     else:
-        cells[(x,y)] = make_cell('worker')      
+        cells[(x,y)] = make_cell('worker', pos=(x,y))      
     cells[(x,y)].grid(row=y,column=x)
     frame.pack(fill = tk.BOTH, expand = True)
     
@@ -216,22 +257,22 @@ def move_player(direction):
     clean_cell(next_x,next_y)
     # Test whether the appearance of the player need to change on the next cell
     if (next_x,next_y) in warehouse.targets:
-        cells[(next_x,next_y)] = make_cell('worker_on_target')
+        cells[(next_x,next_y)] = make_cell('worker_on_target', pos=(x,y))
     else:
-        cells[(next_x,next_y)] = make_cell('worker')
+        cells[(next_x,next_y)] = make_cell('worker', pos=(x,y))
     cells[(next_x,next_y)].grid(row=next_y,column=next_x) # move it to the next cell
     warehouse.worker = (next_x,next_y)
     # update the cell where the player was
     if (x,y) in warehouse.targets:
         # cell x,y has already been cleaned
-        cells[(x,y)] = make_cell('target')      
+        cells[(x,y)] = make_cell('target', pos=(x,y))      
         cells[(x,y)].grid(row=y,column=x)
     puzzle_solved = all(z in warehouse.targets for z in warehouse.boxes)
     if puzzle_solved:
         x,y = warehouse.worker
         # widget in the cell currently containing the player
         clean_cell(x, y)
-        cells[(x,y)] = make_cell('smiley') 
+        cells[(x,y)] = make_cell('smiley', pos=(x,y)) 
         cells[(x,y)].grid(row=y,column=x)
     frame.pack()
           
@@ -258,9 +299,9 @@ def try_move_box(location, next_location):
             clean_cell(next_x,next_y)
         # new widget for the moved box
         if (next_x,next_y) in warehouse.targets:
-            cells[(next_x,next_y)] = make_cell('box_on_target', get_box_weight(x,y))            
+            cells[(next_x,next_y)] = make_cell('box_on_target', get_box_weight(x,y), pos=(x,y))            
         else:
-            cells[(next_x,next_y)] = make_cell('box',  get_box_weight(x,y)) 
+            cells[(next_x,next_y)] = make_cell('box',  get_box_weight(x,y), pos=(x,y)) 
         cells[(next_x,next_y)].grid(row=next_y, column=next_x)
         # we have to preserve the position of the box in the list boxes
         bi = warehouse.boxes.index((x,y))
