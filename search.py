@@ -126,10 +126,10 @@ class PriorityQueue:
 
     def append(self, item):
         """Insert item at its correct position."""
-        print(self.f(item))
-        print(item)
 
-        heapq.heappush(self.heap, (int(self.f(item)), item))
+        print(f'PriorityQueue.append: ({self.f(item)}, {item})')
+
+        heapq.heappush(self.heap, (self.f(item), item))
 
     def extend(self, items):
         """Insert each item in items at its correct position."""
@@ -244,13 +244,10 @@ class Node:
         return "<Node {}>".format(self.state)
 
     def __lt__(self, node):
-        return False
+        return self.state < node.state
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
-
-
-
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
 
@@ -332,11 +329,6 @@ def graph_search(problem, frontier):
     explored = set() # initial empty set of explored states
     while frontier:
         node = frontier.pop()
-        # printout = copy.copy(problem.warehouse)
-        # printout.boxes = copy.copy(node.state.boxes)
-        # printout.worker = copy.copy(node.state.worker)
-        # print(printout)
-
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
@@ -350,7 +342,6 @@ def graph_search(problem, frontier):
 def breadth_first_tree_search(problem):
     "Search the shallowest nodes in the search tree first."
     return tree_search(problem, FIFOQueue())
-
 
 
 def depth_first_tree_search(problem):
@@ -400,7 +391,6 @@ def best_first_tree_search(problem, f):
                     # replace the incumbent with child
                     del frontier[child]
                     frontier.append(child)
-    
     return None
 
 
@@ -420,7 +410,7 @@ def best_first_graph_search(problem: Problem, f: Callable[[Node], int]):
     explored = set() # set of states
     while frontier:
         node = frontier.pop()
-        print(node.state)
+        print(f'best_first_graph_search: frontier.pop({node.state})')
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)

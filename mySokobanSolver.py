@@ -213,17 +213,15 @@ class State:
     An instance of the class 'State' represents a state of a Sokoban puzzle.
     '''
 
-    def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None, f: Callable[[], int] = None) -> None:
+    def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None) -> None:
         self.worker = worker
         self.boxes = copy.copy(boxes)
-        self.f = f
 
     def copy(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None):
         clone = State()
         clone.worker = worker or self.worker  # tuple is immutable
         # array is mutable, again, tuple is immutable
         clone.boxes = copy.copy(boxes) or copy.copy(self.boxes)
-        clone.f = self.f
         return clone
 
     def __eq__(self, other) -> bool:
@@ -237,9 +235,7 @@ class State:
         return True
 
     def __lt__(self, other) -> bool:
-        if self.f == None:
-            raise RuntimeError("f is not defined in State")
-        return self.f < other.f
+        return False # priority should not be calculated here
 
     def __hash__(self) -> int:
         return hash(self.worker) ^ functools.reduce(operator.xor, [hash(box) for box in self.boxes])
