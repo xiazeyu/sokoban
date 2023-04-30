@@ -210,7 +210,7 @@ def taboo_cells(warehouse: sokoban.Warehouse) -> str:
 
 class State:
     '''
-    An instance of the class 'State' represents a state of a Sokoban puzzle.
+    The class 'State' represents a state of a Sokoban puzzle.
     '''
 
     def __init__(self, worker: tuple[int, int] = None, boxes: list[tuple[int, int]] = None) -> None:
@@ -235,59 +235,21 @@ class State:
         return True
 
     def __lt__(self, other) -> bool:
-        return False # priority should not be calculated here
+    # when this function is called, it means that the two states are equally important
+        return False  # priority should not be calculated here.
 
     def __hash__(self) -> int:
         return hash(self.worker) ^ functools.reduce(operator.xor, [hash(box) for box in self.boxes])
 
     def __str__(self) -> int:
-        if self.f == None:
-            return str({'worker': self.worker, 'boxes': self.boxes})
-        return str({'worker': self.worker, 'boxes': self.boxes, 'f': self.f(self)})
+        return str({'worker': self.worker, 'boxes': self.boxes})
+
 
 def manhattan_distance(a: tuple[int, int], b: tuple[int, int]) -> int:
     '''
     Calculate the Manhattan distance between two points.
     '''
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
-
-def dist_map(warehouse: sokoban.Warehouse, start: tuple[int, int]) -> list[list[int]]:
-    '''
-    Dijkstra's algorithm for shortest path to all cells.
-
-    @param warehouse: a Warehouse object
-    @param start: the start position
-    @return: a distance matrix starting from start.
-    '''
-    # initialize
-    x_max = warehouse.ncols # x < x_max
-    y_max = warehouse.nrows # y < y_max
-    dist: list[list[int]] = [[math.inf for _ in range(warehouse.nrows)]
-            for _ in range(warehouse.ncols)]
-    final: list[list[bool]] = [[False for _ in range(warehouse.nrows)]
-            for _ in range(warehouse.ncols)]
-    Q = search.PriorityQueue(f=lambda x: x[1])
-    Q.append((start, 0))
-    dist[start[0]][start[1]] = 0
-    final[start[0]][start[1]] = True
-
-    while len(Q) > 0:
-        (x, y), _ = Q.pop()
-        for move in _moves:
-            dx, dy = _moves[move]
-            if x + dx >= x_max or x + dx < 0 or y + dy >= y_max or y + dy < 0:
-                continue
-            if (x + dx, y + dy) in warehouse.walls or (x + dx, y + dy) in warehouse.boxes:
-                continue
-            if final[x + dx][y + dy]:
-                continue
-            if dist[x + dx][y + dy] > dist[x][y] + 1:
-                dist[x + dx][y + dy] = dist[x][y] + 1
-                final[x + dx][y + dy] = True
-                Q.append(((x + dx, y + dy), dist[x + dx][y + dy]))
-
-    return dist
 
 class SokobanPuzzle(search.Problem):
     '''
@@ -340,7 +302,7 @@ class SokobanPuzzle(search.Problem):
 
             all_moves.extend([(idx, name) for name in moves])
 
-        return moves
+        return all_moves
 
     def goal_test(self, state: State) -> bool:
         """Return True if the state is a goal. The default method compares the
@@ -351,14 +313,24 @@ class SokobanPuzzle(search.Problem):
                 return False
         return True
 
-    def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
+    def path_cost(self, c: int, state1: State, action: str, state2: State = None) -> int:
         """Return the cost of a solution path that arrives at state2 from
         state1 via action, assuming cost c to get up to state1. If the problem
         is such that the path doesn't matter, this function will only look at
         state2.  If the path does matter, it will consider c and maybe state1
         and action. The default method costs 1 for every step in the path."""
-        raise NotImplementedError()
-        
+
+        assert action in self.actions(state1)
+        # assert state2 == self.result(state1, action)
+        box_idx, direction = action
+
+        dx, dy = _moves[direction]
+        box_start = state1.boxes[box_idx]
+        worker_end_x, worker_end_y = (box_start[0]-dx, box_start[1]-dy)
+        cost = self.worker_cost(state1)
+        worker_dist_cost = cost[worker_end_x][worker_end_y]
+
+        return worker_dist_cost + 1 + self.weights[box_idx]
 
     def result(self, state: State, action: str) -> State:
         """Return the state that results from executing the given
@@ -420,7 +392,8 @@ class SokobanPuzzle(search.Problem):
         path = goal_node.path()
         # print the solution for debug purpose
         print(f"Solution takes {len(path)-1} steps from the initial state")
-        print(f"Solution takes {goal_node.path_cost} cost from the initial state")
+        print(
+            f"Solution takes {goal_node.path_cost} cost from the initial state")
 
         print()
         print(path[0].state)
@@ -433,38 +406,53 @@ class SokobanPuzzle(search.Problem):
                 print("move to {0}".format(node.action))
             print(node.state)
 
+    def worker_cost(self, state: State) -> list[list[int]]:
+        dist_func = search.memoize(self._dist_map, slot='worker_cost')
+        start = state.worker
+        return dist_func(state, start)
+    
+    def _dist_map(self, state: State, start: tuple[int, int]) -> list[list[int]]:
+        '''
+        Dijkstra's algorithm for shortest path to all cells.
+        @param state: the state of the warehouse
+        @param start: the start position
+        @return: a distance matrix starting from start.
+        '''
+        # initialize
+        x_max = self.ncols  # x < x_max
+        y_max = self.nrows  # y < y_max
+        dist: list[list[int]] = [[math.inf for _ in range(self.nrows)]
+                                for _ in range(self.ncols)]
+        final: list[list[bool]] = [[False for _ in range(self.nrows)]
+                                for _ in range(self.ncols)]
+        Q = search.PriorityQueue(f=lambda x: x[1])
+        Q.append((start, 0))
+        dist[start[0]][start[1]] = 0
+        final[start[0]][start[1]] = True
+
+        while len(Q) > 0:
+            (x, y), _ = Q.pop()
+            for move in _moves:
+                dx, dy = _moves[move]
+                if x + dx >= x_max or x + dx < 0 or y + dy >= y_max or y + dy < 0:
+                    continue
+                if (x + dx, y + dy) in self.walls or (x + dx, y + dy) in state.boxes:
+                    continue
+                if final[x + dx][y + dy]:
+                    continue
+                if dist[x + dx][y + dy] > dist[x][y] + 1:
+                    dist[x + dx][y + dy] = dist[x][y] + 1
+                    final[x + dx][y + dy] = True
+                    Q.append(((x + dx, y + dy), dist[x + dx][y + dy]))
+
+        return dist
+
     def h(self, node: search.Node) -> int:
         '''
         Heuristic for goal state. 
         h(n) = ?
         '''
-        state = node.state
-        costs = [0]
-        tempCombination = {}
-        for targetX, targetY in self.targets:
-            for index, (boxX,boxY) in  enumerate(state.boxes):
-                tempCombination[(targetX, targetY),(boxX,boxY) ] = (abs(targetX - boxX) + abs(targetY - boxY)) * self.weights[index]
-        print(tempCombination)
-        Combinations = [[]]
-        for i in range(len(self.targets) -1) :
-            for (target, box) in tempCombination.keys():
-                placed = False
-                for index, combinationList in  enumerate(Combinations):
-                    Found = False
-                    for (CombinationTarget,CombinationBox) in combinationList:
-                        if  target == CombinationTarget or box == CombinationBox:
-                            Found = True
-                            break
-                    if not Found:
-                        Combinations[index].append((target, box))
-                        costs[index] += tempCombination[(target, box)]
-                        placed = True
-                        break
-                            
-                if not placed:
-                    Combinations.append([(target,box)]) 
-                    costs.append(tempCombination[(target, box)])
-        return min(costs)
+        raise NotImplementedError()
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):
@@ -489,7 +477,7 @@ class SokobanPuzzleWorker(SokobanPuzzle):
                     moves.pop(name)
 
         return moves
-    
+
     def path_cost(self, c: int, state1: State, action: str, state2: State) -> int:
         assert action in self.actions(state1)
         (x, y) = state1.worker
@@ -523,8 +511,43 @@ class SokobanPuzzleWorker(SokobanPuzzle):
             if (box_x, box_y) == next_state.worker:
                 next_state.boxes[index] = (box_x + dx, box_y + dy)
         return next_state
+    
+    def h(self, node: search.Node) -> int:
+        '''
+        Heuristic for goal state. 
+        h(n) = ?
+        '''
+        state = node.state
+        costs = [0]
+        tempCombination = {}
+        for targetX, targetY in self.targets:
+            for index, (boxX, boxY) in enumerate(state.boxes):
+                tempCombination[(targetX, targetY), (boxX, boxY)] = (
+                    abs(targetX - boxX) + abs(targetY - boxY)) * self.weights[index]
+        print(tempCombination)
+        Combinations = [[]]
+        for i in range(len(self.targets) - 1):
+            for (target, box) in tempCombination.keys():
+                placed = False
+                for index, combinationList in enumerate(Combinations):
+                    Found = False
+                    for (CombinationTarget, CombinationBox) in combinationList:
+                        if target == CombinationTarget or box == CombinationBox:
+                            Found = True
+                            break
+                    if not Found:
+                        Combinations[index].append((target, box))
+                        costs[index] += tempCombination[(target, box)]
+                        placed = True
+                        break
+
+                if not placed:
+                    Combinations.append([(target, box)])
+                    costs.append(tempCombination[(target, box)])
+        return min(costs)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
 def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]):
     '''
@@ -595,7 +618,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         t0 = time.time()
         goal_node = search.astar_graph_search(problem)
         t1 = time.time()
-        print ('A* Solver took {:.6f} seconds'.format(t1-t0))
+        print('A* Solver took {:.6f} seconds'.format(t1-t0))
         SokobanPuzzleWorker.print_solution(goal_node)
         return SokobanPuzzleWorker.parse_goal_node(goal_node)
 
