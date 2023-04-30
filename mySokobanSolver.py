@@ -279,7 +279,7 @@ class SokobanPuzzle(search.Problem):
         """
         Return the list of boxes' actions that can be executed in the given state.
 
-        Each action consists of a direction and a box index.
+        Each action consists of a box index and a direction.
 
         """
 
@@ -294,11 +294,21 @@ class SokobanPuzzle(search.Problem):
             for name in _moves:
                 (x, y) = box
                 (dx, dy) = _moves[name]
-                if (x+dx, y+dy) in self.walls:
+                if (x+dx, y+dy) in self.walls + state.boxes:
+                    # a box cannot be pushed into a wall or box
                     moves.pop(name)
-                if (x+dx, y+dy) in state.boxes:
-                    if (x+2*dx, y+2*dy) in self.taboo_cells + self.walls + state.boxes:
-                        moves.pop(name)
+                    continue
+                if (x-dx, y-dy) in self.walls + state.boxes:
+                    # a player cannot get into a wall or box
+                    moves.pop(name)
+                    continue
+                if (x+dx, y+dy) in self.taboo_cells:
+                    # a box cannot be pushed into a taboo cell
+                    moves.pop(name)
+                    continue
+                if self.worker_cost(state)[x+dx][y+dy] == math.inf:
+                    # a box cannot be pushed into a cell that is unreachable by the worker
+                    moves.pop(name)
 
             all_moves.extend([(idx, name) for name in moves])
 
@@ -313,7 +323,7 @@ class SokobanPuzzle(search.Problem):
                 return False
         return True
 
-    def path_cost(self, c: int, state1: State, action: str, state2: State = None) -> int:
+    def path_cost(self, c: int, state1: State, action: tuple[int, str], state2: State = None) -> int:
         """Return the cost of a solution path that arrives at state2 from
         state1 via action, assuming cost c to get up to state1. If the problem
         is such that the path doesn't matter, this function will only look at
@@ -322,6 +332,7 @@ class SokobanPuzzle(search.Problem):
 
         assert action in self.actions(state1)
         # assert state2 == self.result(state1, action)
+
         box_idx, direction = action
 
         dx, dy = _moves[direction]
@@ -332,38 +343,20 @@ class SokobanPuzzle(search.Problem):
 
         return worker_dist_cost + 1 + self.weights[box_idx]
 
-    def result(self, state: State, action: str) -> State:
+    def result(self, state: State, action: tuple[int, str]) -> State:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-        raise NotImplementedError()
         assert action in self.actions(state)
-        next_box, next_worker = None, None
-        next_state = copy.copy(state)  # HACK?
-        (x, y) = state.worker
-        if action == 'Left':
-            next_state.worker = (x-1, y)
-            for index, (boxX, boxY) in enumerate(state.boxes):
-                if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] = (boxX - 1, boxY)
-        elif action == 'Up':
-            next_state.worker = (x, y-1)
 
-            for index, (boxX, boxY) in enumerate(state.boxes):
-                if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] = (boxX, boxY-1)
-        elif action == 'Down':
-            next_state.worker = (x, y+1)
-            for index, (boxX, boxY) in enumerate(state.boxes):
-                if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] = (boxX, boxY+1)
-        elif action == 'Right':
-            next_state.worker = (x+1, y)
-            for index, (boxX, boxY) in enumerate(state.boxes):
-                if (boxX, boxY) == next_state.worker:
-                    next_state.boxes[index] = (boxX + 1, boxY)
+        box_idx, direction = action
 
-        next_state = State()
+        next_worker = state.boxes[box_idx]
+        dx, dy = _moves[direction]
+        next_box = (next_worker[0]+dx, next_worker[1]+dy)
+        next_state = state.copy(worker=next_worker)
+        next_state.boxes[box_idx] = next_box
+
         return next_state
 
     def value(self, state: State) -> int:
@@ -472,6 +465,7 @@ class SokobanPuzzleWorker(SokobanPuzzle):
             (dx, dy) = moves[name]
             if (x+dx, y+dy) in self.walls:
                 moves.pop(name)
+                continue
             if (x+dx, y+dy) in state.boxes:
                 if (x+2*dx, y+2*dy) in self.walls + state.boxes:
                     moves.pop(name)
