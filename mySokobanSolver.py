@@ -690,7 +690,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
             C is the total cost of the action sequence C
 
     '''
-    mode = 'aster_box'
+    mode = 'bfs_box'
 
     if mode == 'bfs_worker':
         problem = SokobanPuzzleWorker(warehouse)
@@ -717,7 +717,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         t1 = time.time()
         print('BFSBox Solver took {:.6f} seconds'.format(t1-t0))
         # SokobanPuzzle.print_solution(goal_node)
-        return SokobanPuzzle.parse_goal_node(goal_node)
+        return problem.parse_goal_node(goal_node)
 
     if mode == 'astar_box':
         problem = SokobanPuzzle(warehouse)
@@ -726,7 +726,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         t1 = time.time()
         print('A*Box Solver took {:.6f} seconds'.format(t1-t0))
         # SokobanPuzzle.print_solution(goal_node)
-        return SokobanPuzzle.parse_goal_node(goal_node)
+        return problem.parse_goal_node(goal_node)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
