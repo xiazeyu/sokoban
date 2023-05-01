@@ -32,8 +32,6 @@ assert sys.version_info >= (3, 5)
 import itertools
 import functools
 import heapq
-import copy
-from typing import Callable
 
 import collections # for dequeue
 
@@ -126,7 +124,6 @@ class PriorityQueue:
 
     def append(self, item):
         """Insert item at its correct position."""
-        #print(f'PriorityQueue.append: ({self.f(item)}, {item})')
         heapq.heappush(self.heap, (self.f(item), item))
 
     def extend(self, items):
@@ -194,7 +191,7 @@ class Problem(object):
         action in the given state. The action must be one of
         self.actions(state)."""
         raise NotImplementedError
-    
+
     def goal_test(self, state):
         """Return True if the state is a goal. The default method compares the
         state to self.goal, as specified in the constructor. Override this
@@ -326,8 +323,7 @@ def graph_search(problem, frontier):
     frontier.append(Node(problem.initial))
     explored = set() # initial empty set of explored states
     while frontier:
-
-        node: Node = frontier.pop()
+        node = frontier.pop()
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
@@ -394,7 +390,7 @@ def best_first_tree_search(problem, f):
 
 
 
-def best_first_graph_search(problem: Problem, f: Callable[[Node], int]):
+def best_first_graph_search(problem, f):
     """
     Search the nodes with the lowest f scores first.
     You specify the function f(node) that you want to minimize; for example,
@@ -408,8 +404,7 @@ def best_first_graph_search(problem: Problem, f: Callable[[Node], int]):
     frontier.append(node)
     explored = set() # set of states
     while frontier:
-        node: Node = frontier.pop()
-        # print(f'best_first_graph_search: frontier.pop({node.state})')
+        node = frontier.pop()
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
@@ -468,7 +463,7 @@ def iterative_deepening_search(problem):
 greedy_best_first_graph_search = best_first_graph_search
 # Greedy best-first search is accomplished by specifying f(n) = h(n).
 
-def astar_graph_search(problem: Problem, h: Callable[[Node], int]=None):
+def astar_graph_search(problem, h=None):
     """A* search is best-first graph search with f(n) = g(n)+h(n).
     You need to specify the h function when you call astar_search, or
     else in your Problem subclass."""
