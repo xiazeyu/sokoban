@@ -708,10 +708,27 @@ class SokobanPuzzle(search.Problem):
 
         return dist
     
-    def no_heuristic(self, node: search.Node) -> int:
+    def uniform_cost_search_h(self, node: search.Node) -> int:
         # no heuristic
         # this becomes uniform_cost_search
         return 0
+
+    def nearest_target_sum_h(self, node: search.Node) -> int:
+        cost = 0
+        for box_index, box in enumerate(node.state.boxes):
+            cost += min(manhattan_distance(box, target) for target in self.targets) * self.weights[box_index]
+        return cost / len(node.state.boxes)
+
+    def match_target_sum_h(self, node: search.Node) -> int:
+        cost = math.inf
+        matches = [list(zip(node.state.boxes, _)) for _ in itertools.permutations(self.targets)]
+        for match in matches:
+            match_cost = 0
+            for index, (box, target) in enumerate(match):
+                match_cost += manhattan_distance(box, target) * self.weights[index]
+            cost = min(cost, match_cost)
+
+        return cost / len(node.state.boxes)
 
     def h(self, node: search.Node) -> int:
         """
@@ -730,38 +747,7 @@ class SokobanPuzzle(search.Problem):
             The heuristic value.
 
         """
-        return self.no_heuristic(node)
-        return sum(self._box_dist(node.state, box) for box in node.state.boxes)
-        # [list(zip(boxes, _)) for _ in itertools.permutations(goals)]
-        # state = node.state
-        # costs = [0]
-        # tempCombination = {}
-        # for targetX, targetY in self.targets:
-        #     for index, (boxX, boxY) in enumerate(state.boxes):
-        #         tempCombination[(targetX, targetY), (boxX, boxY)] = (
-        #             abs(targetX - boxX) + abs(targetY - boxY)) * self.weights[index]
-        # # print(tempCombination)
-        # Combinations = [[]]
-        # for i in range(len(self.targets) - 1):
-        #     for (target, box) in tempCombination.keys():
-        #         placed = False
-        #         for index, combinationList in enumerate(Combinations):
-        #             Found = False
-        #             for (CombinationTarget, CombinationBox) in combinationList:
-        #                 if target == CombinationTarget or box == CombinationBox:
-        #                     Found = True
-        #                     break
-        #             if not Found:
-        #                 Combinations[index].append((target, box))
-        #                 costs[index] += tempCombination[(target, box)]
-        #                 placed = True
-        #                 break
-
-        #         if not placed:
-        #             Combinations.append([(target, box)])
-        #             costs.append(tempCombination[(target, box)])
-        # return min(costs)
-
+        return self.uniform_cost_search_h(node)
 
 class SokobanPuzzleWorker(SokobanPuzzle):
     # Only for check_elem_action_seq and BFS test
@@ -887,53 +873,6 @@ class SokobanPuzzleWorker(SokobanPuzzle):
             if node.action is not None:
                 answer.append(node.action)
         return answer, cost
-
-    def h(self, node: search.Node) -> int:
-        """
-        Heuristic for goal state.
-
-        h = manhattan distance from each box to the closest goal.
-
-        Parameters
-        ----------
-        node : search.Node
-            The node to be checked.
-
-        Returns
-        -------
-        int
-            The heuristic value.
-
-        """
-        # [list(zip(boxes, _)) for _ in itertools.permutations(goals)]
-        state = node.state
-        costs = [0]
-        tempCombination = {}
-        for targetX, targetY in self.targets:
-            for index, (boxX, boxY) in enumerate(state.boxes):
-                tempCombination[(targetX, targetY), (boxX, boxY)] = (
-                    abs(targetX - boxX) + abs(targetY - boxY)) * self.weights[index]
-        # print(tempCombination)
-        Combinations = [[]]
-        for i in range(len(self.targets) - 1):
-            for (target, box) in tempCombination.keys():
-                placed = False
-                for index, combinationList in enumerate(Combinations):
-                    Found = False
-                    for (CombinationTarget, CombinationBox) in combinationList:
-                        if target == CombinationTarget or box == CombinationBox:
-                            Found = True
-                            break
-                    if not Found:
-                        Combinations[index].append((target, box))
-                        costs[index] += tempCombination[(target, box)]
-                        placed = True
-                        break
-
-                if not placed:
-                    Combinations.append([(target, box)])
-                    costs.append(tempCombination[(target, box)])
-        return min(costs)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

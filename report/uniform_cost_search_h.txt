@@ -1,0 +1,73 @@
+Using submitted solver
+[(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 0!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 1!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 2!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 3!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 4!  :-)
+
+<<  check_elem_action_seq, test 0>>
+Test 0 passed!  :-)
+
+<<  check_elem_action_seq, test 1>>
+Test 1 passed!  :-)
+
+<<  test_solve_weighted_sokoban >>
+case 0, ./warehouses/warehouse_01.txt
+A* Worker Solver
+took 0.015919 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 1, ./warehouses/warehouse_8a.txt
+A* Worker Solver
+took 0.907235 seconds
+Steps are not the same, but don't worries!
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 2, ./warehouses/warehouse_09.txt
+A* Worker Solver
+took 0.008021 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 3, ./warehouses/warehouse_47.txt
+A* Worker Solver
+took 0.383712 seconds
+Steps are not the same, but don't worries!
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 4, ./warehouses/warehouse_81.txt
+A* Worker Solver
+took 14.505694 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 5, ./warehouses/warehouse_5n.txt
+A* Worker Solver
+took 1524.729069 seconds
+Answer as expected, Impossible!  :-)
+
+case 6, ./warehouses/warehouse_07.txt

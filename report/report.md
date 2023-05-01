@@ -19,6 +19,10 @@ The last part of development is to figure out the parameter that drives informed
 
 
 #### State
+Think about what is static and what is dynamic in the problem.
+In this problem, 
+• Where do you think static things should go? Problem instance or state?
+• Where do you think dynamic things should go? Problem instance or state?
 
 #### Heuristics
 
