@@ -352,6 +352,10 @@ class SokobanPuzzle(search.Problem):
             for name in _moves:
                 (x, y) = box
                 (dx, dy) = _moves[name]
+                if not self.in_range((x+dx, y+dy)):
+                    # a box cannot be pushed out of the warehouse
+                    moves.pop(name)
+                    continue
                 if (x+dx, y+dy) in self.walls + state.boxes:
                     # a box cannot be pushed into a wall or box
                     moves.pop(name)
@@ -364,12 +368,8 @@ class SokobanPuzzle(search.Problem):
                     # a box cannot be pushed into a taboo cell
                     moves.pop(name)
                     continue
-                if self.worker_cost(state)[x+dx][y+dy] == math.inf:
+                if self.worker_cost(state)[x-dx][y-dy] == math.inf:
                     # a box cannot be pushed into a cell that is unreachable by the worker
-                    moves.pop(name)
-                    continue
-                if not self.in_range((x+dx, y+dy)):
-                    # a box cannot be pushed out of the warehouse
                     moves.pop(name)
                     continue
 
@@ -502,6 +502,19 @@ class SokobanPuzzle(search.Problem):
         dist_func = search.memoize(self._dist_map, slot='worker_cost')
         start = state.worker
         return dist_func(state, start)
+    
+    def print_worker_cost(self, state: State) -> None:
+        wc = self.worker_cost(state)
+        print('y\\x', end='\t')
+        for x in range(self.ncols):
+            print(x, end='\t')
+        print()
+        for y_index in range(self.nrows):
+            print(y_index, end='\t')
+            for x_index in range(self.ncols):
+                # print((x_index, y_index), end='\t')
+                print(wc[x_index][y_index], end='\t')
+            print()
 
     def _dist_map(self, state: State, start: tuple[int, int]) -> list[list[int]]:
         '''

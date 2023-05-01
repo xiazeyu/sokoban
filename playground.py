@@ -11,26 +11,20 @@ from mySokobanSolver import SokobanPuzzle, solve_weighted_sokoban
 from search import FIFOQueue, breadth_first_graph_search
 
 wh = Warehouse()
-wh.load_warehouse("./warehouses/test_push.txt")
 wh.load_warehouse("./warehouses/warehouse_01.txt")
 
 pz=SokobanPuzzle(wh)
 state = pz.initial
 
 action_queue = [
+    (0, 'Up'),
     (1, 'Left'),
+    (1, 'Up'),
+    (1, 'Right'),
     (0, 'Down'),
-    (0, 'Right'),
-    (0, 'Right'),
-    (0, 'Right'),
     (1, 'Left'),
-    (1, 'Down'),
-    (1, 'Left'),
-    (0, 'Right'),
-    (0, 'Right'),
-    (0, 'Right'),
-    (0, 'Right'),
-    (0, 'Right'),
+    (1, 'Up'), # [(0, 'Down'), (1, 'Down')]
+    (1, 'Up'),
 ]
 
 Q = FIFOQueue()
@@ -38,24 +32,24 @@ c = 0
 for act in action_queue:
     Q.append(act)
 
+print(f'initial: {state} cost: 0')
+print(f'actions: {pz.actions(state)} goal:{pz.goal_test(state)}')
+
 while len(Q) > 0:
     now_act = Q.pop()
-    new_cost = pz.path_cost(0, state, now_act)
-    print(f'actions: {pz.actions(state)} goal:{pz.goal_test(state)}')
     print(f'execute: {now_act}')
-    print(f'state: {state} cost: +{new_cost}={c}')
-    c += new_cost
+    new_cost = pz.path_cost(0, state, now_act)
     state = pz.result(state, now_act)
-
-
-print(f'actions: {pz.actions(state)} goal:{pz.goal_test(state)}')
-print(f'execute: {now_act}')
-print(f'state: {state} cost={c}')
+    c += new_cost
+    print(f'state: {state} cost: +{new_cost}={c}')
+    print(f'actions: {pz.actions(state)} goal:{pz.goal_test(state)}')
 
 goal_node = breadth_first_graph_search(pz)
 
 answer, cost = solve_weighted_sokoban(wh)
-
+wh.load_warehouse("./warehouses/warehouse_8a.txt")
+answer, cost = solve_weighted_sokoban(wh)
+# 8a
 # [(<Node {'worker': (6, 3), 'boxes': [(3, 2), (5, 2)]}>, None),
 #  (<Node {'worker': (3, 2), 'boxes': [(3, 3), (5, 2)]}>, (0, 'Down')),
 #  (<Node {'worker': (3, 3), 'boxes': [(2, 3), (5, 2)]}>, (0, 'Left')),
