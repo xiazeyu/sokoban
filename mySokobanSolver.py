@@ -713,19 +713,51 @@ class SokobanPuzzle(search.Problem):
         # this becomes uniform_cost_search
         return 0
 
-    def nearest_target_sum_h(self, node: search.Node) -> int:
+    def nearest_target_manhattan_sum_h(self, node: search.Node) -> int:
         cost = 0
         for box_index, box in enumerate(node.state.boxes):
             cost += min(manhattan_distance(box, target) for target in self.targets) * self.weights[box_index]
         return cost / len(node.state.boxes)
 
-    def match_target_sum_h(self, node: search.Node) -> int:
+    def match_target_manhattan_sum_h(self, node: search.Node) -> int:
         cost = math.inf
         matches = [list(zip(node.state.boxes, _)) for _ in itertools.permutations(self.targets)]
         for match in matches:
             match_cost = 0
             for index, (box, target) in enumerate(match):
                 match_cost += manhattan_distance(box, target) * self.weights[index]
+            cost = min(cost, match_cost)
+
+        return cost / len(node.state.boxes)
+
+    def match_target_hungarian_manhattan_sum_h(self, node: search.Node) -> int:
+        raise NotImplementedError()
+        # import numpy as np
+        # from scipy.optimize import linear_sum_assignment
+
+        cost = math.inf
+        matches = [list(zip(node.state.boxes, _)) for _ in itertools.permutations(self.targets)]
+        for match in matches:
+            match_cost = 0
+            for index, (box, target) in enumerate(match):
+                match_cost += manhattan_distance(box, target) * self.weights[index]
+            cost = min(cost, match_cost)
+
+        return cost / len(node.state.boxes)
+
+    def nearest_target_dijkstra_sum_h(self, node: search.Node) -> int:
+        cost = 0
+        for box_index, box in enumerate(node.state.boxes):
+            cost += min(self._dist_map(node.state, box)[target[0]][target[1]] for target in self.targets) * self.weights[box_index]
+        return cost / len(node.state.boxes)
+
+    def match_target_dijkstra_sum_h(self, node: search.Node) -> int:
+        cost = math.inf
+        matches = [list(zip(node.state.boxes, _)) for _ in itertools.permutations(self.targets)]
+        for match in matches:
+            match_cost = 0
+            for index, (box, target) in enumerate(match):
+                match_cost += self._dist_map(node.state, box)[target[0]][target[1]] * self.weights[index]
             cost = min(cost, match_cost)
 
         return cost / len(node.state.boxes)
@@ -748,6 +780,7 @@ class SokobanPuzzle(search.Problem):
 
         """
         return self.uniform_cost_search_h(node)
+
 
 class SokobanPuzzleWorker(SokobanPuzzle):
     # Only for check_elem_action_seq and BFS test
@@ -946,7 +979,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse) -> tuple[list[str], int
             return 'Impossible', None
 
     """
-    mode = 'astar_worker'
+    mode = 'astar_box'
 
     if mode == 'bfs_worker':
         problem = SokobanPuzzleWorker(warehouse)
