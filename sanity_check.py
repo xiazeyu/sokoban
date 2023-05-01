@@ -196,14 +196,16 @@ None],
 
         if answer == 'Impossible':
             if expected_answer == 'Impossible':
-                print(f'Answer as expected!  :-)\n')
+                print(f'Answer as expected, Impossible!  :-)\n')
             else:
                 print(f'Your answer = {answer}, expected answer = {expected_answer}')
             continue
 
         answer, cost = answer
         if answer == expected_answer:
-            print(f'Answer as expected!  :-)\n')
+            print(f'Answer as expected, wow!  :-)\n')
+        else:
+            print('Steps are not the same, but don\'t worries!')
 
         if cost==expected_cost:
             print(f'Cost as expected!  :-)\n')

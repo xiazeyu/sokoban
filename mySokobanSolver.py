@@ -707,6 +707,11 @@ class SokobanPuzzle(search.Problem):
                     Q.append(((x + dx, y + dy), dist[x + dx][y + dy]))
 
         return dist
+    
+    def no_heuristic(self, node: search.Node) -> int:
+        # no heuristic
+        # this becomes uniform_cost_search
+        return 0
 
     def h(self, node: search.Node) -> int:
         """
@@ -725,9 +730,37 @@ class SokobanPuzzle(search.Problem):
             The heuristic value.
 
         """
-        # static 0 for debugging
-        return 0
+        return self.no_heuristic(node)
         return sum(self._box_dist(node.state, box) for box in node.state.boxes)
+        # [list(zip(boxes, _)) for _ in itertools.permutations(goals)]
+        # state = node.state
+        # costs = [0]
+        # tempCombination = {}
+        # for targetX, targetY in self.targets:
+        #     for index, (boxX, boxY) in enumerate(state.boxes):
+        #         tempCombination[(targetX, targetY), (boxX, boxY)] = (
+        #             abs(targetX - boxX) + abs(targetY - boxY)) * self.weights[index]
+        # # print(tempCombination)
+        # Combinations = [[]]
+        # for i in range(len(self.targets) - 1):
+        #     for (target, box) in tempCombination.keys():
+        #         placed = False
+        #         for index, combinationList in enumerate(Combinations):
+        #             Found = False
+        #             for (CombinationTarget, CombinationBox) in combinationList:
+        #                 if target == CombinationTarget or box == CombinationBox:
+        #                     Found = True
+        #                     break
+        #             if not Found:
+        #                 Combinations[index].append((target, box))
+        #                 costs[index] += tempCombination[(target, box)]
+        #                 placed = True
+        #                 break
+
+        #         if not placed:
+        #             Combinations.append([(target, box)])
+        #             costs.append(tempCombination[(target, box)])
+        # return min(costs)
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):
