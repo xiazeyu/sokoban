@@ -94,7 +94,7 @@ def get_box_weight(x,y):
 
 #----------------------------------------------------------------------------
 
-def make_cell(cell_type, box_weight = None):
+def make_cell(cell_type, box_weight = None, pos = None):
     '''
     Create a canvas for a cell of the warehouse
     Return a painted canvas
