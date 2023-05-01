@@ -326,10 +326,10 @@ def graph_search(problem, frontier):
     frontier.append(Node(problem.initial))
     explored = set() # initial empty set of explored states
     while frontier:
-        node = frontier.pop()
+
+        node: Node = frontier.pop()
         if problem.goal_test(node.state):
-            print(f'Goal reached{node.path_cost}')
-            # return node
+            return node
         explored.add(node.state)
         # Python note: next line uses of a generator
         frontier.extend(child for child in node.expand(problem)
@@ -409,7 +409,7 @@ def best_first_graph_search(problem: Problem, f: Callable[[Node], int]):
     explored = set() # set of states
     while frontier:
         node: Node = frontier.pop()
-        print(f'best_first_graph_search: frontier.pop({node.state})')
+        # print(f'best_first_graph_search: frontier.pop({node.state})')
         if problem.goal_test(node.state):
             return node
         explored.add(node.state)
