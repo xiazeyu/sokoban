@@ -7,12 +7,12 @@ Created on Sun Apr 30 17:05:06 2023
 """
 
 from sokoban import Warehouse
-from mySokobanSolver import SokobanPuzzle
+from mySokobanSolver import SokobanPuzzle, solve_weighted_sokoban
 from search import FIFOQueue, breadth_first_graph_search
 
 wh = Warehouse()
 wh.load_warehouse("./warehouses/test_push.txt")
-wh.load_warehouse("./warehouses/warehouse_8a.txt")
+wh.load_warehouse("./warehouses/warehouse_01.txt")
 
 pz=SokobanPuzzle(wh)
 state = pz.initial
@@ -54,6 +54,8 @@ print(f'state: {state} cost={c}')
 
 goal_node = breadth_first_graph_search(pz)
 
+answer, cost = solve_weighted_sokoban(wh)
+
 # [(<Node {'worker': (6, 3), 'boxes': [(3, 2), (5, 2)]}>, None),
 #  (<Node {'worker': (3, 2), 'boxes': [(3, 3), (5, 2)]}>, (0, 'Down')),
 #  (<Node {'worker': (3, 3), 'boxes': [(2, 3), (5, 2)]}>, (0, 'Left')),
@@ -69,4 +71,4 @@ goal_node = breadth_first_graph_search(pz)
 # parent: <Node {'worker': (6, 3), 'boxes': [(3, 2), (5, 2)]}>
 # action: (0, 'Down')
 # start->end: (6,3)->(3,1)
-# program: (3,1)
+# program(end): (3,1)->(4,1)->(5,1)(4,2)->(6,1){5,1}->(6,2)

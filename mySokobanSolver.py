@@ -443,6 +443,7 @@ class SokobanPuzzle(search.Problem):
         cost = goal_node.path_cost
 
         for node in goal_node.path():
+            # print(node)
             if node.action is not None:
                 parent_state = node.parent.state
                 box_idx, action_direction = node.action
@@ -461,10 +462,10 @@ class SokobanPuzzle(search.Problem):
                     # find the direction of the move
                     for direction in _moves:
                         dx, dy = _moves[direction]
-                        assert cost_map[end[0]][end[1]] != math.inf
-                        if not self.in_range((end[0]+dx, end[1]+dy)):
+                        if not self.in_range((end[0]-dx, end[1]-dy)):
                             # out of range
                             continue
+                        assert cost_map[end[0]][end[1]] != math.inf
                         if cost_map[end[0]-dx][end[1]-dy] == cost_map[end[0]][end[1]] - 1:
                             mid_path.append(direction)
                             assert cost_map[end[0]-dx][end[1]-dy] != math.inf
@@ -473,7 +474,6 @@ class SokobanPuzzle(search.Problem):
                 answer.extend(reversed(mid_path))
                 answer.append(action_direction)
             
-
         return answer, cost
 
     def print_solution(goal_node: search.Node) -> None:
@@ -748,7 +748,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
             C is the total cost of the action sequence C
 
     '''
-    mode = 'astar_box'
+    mode = 'astar_worker'
 
     if mode == 'bfs_worker':
         problem = SokobanPuzzleWorker(warehouse)

@@ -105,28 +105,111 @@ def test_check_elem_action_seq():
 def test_solve_weighted_sokoban():
     datasets = [
 ["./warehouses/warehouse_01.txt",
+['Down', 'Left', 'Up', 'Right', 'Right', 'Right', 'Down',
+ 'Left', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right',
+ 'Up', 'Left', 'Up', 'Right', 'Up', 'Up', 'Left', 'Down',
+ 'Right', 'Down', 'Down', 'Right', 'Right', 'Up', 'Left',
+ 'Down', 'Left', 'Up', 'Up'],
+ 33],
+["./warehouses/warehouse_8a.txt",
 ['Up', 'Left', 'Up', 'Left', 'Left', 'Down', 'Left', 
 'Down', 'Right', 'Right', 'Right', 'Up', 'Up', 'Left', 
 'Down', 'Right', 'Down', 'Left', 'Left', 'Right', 
 'Right', 'Right', 'Right', 'Right', 'Right', 'Right'],
 431],
+["./warehouses/warehouse_09.txt",
+['Up', 'Right', 'Right', 'Down', 'Up', 'Left', 'Left',
+ 'Down', 'Right', 'Down', 'Right', 'Left', 'Up', 'Up',
+ 'Right', 'Down', 'Right', 'Down', 'Down', 'Left', 'Up',
+ 'Right', 'Up', 'Left', 'Down', 'Left', 'Up', 'Right',
+ 'Up', 'Left'],
+396],
+["./warehouses/warehouse_47.txt",
+['Right', 'Right', 'Right', 'Up', 'Up', 'Up', 'Left',
+ 'Left', 'Down', 'Right', 'Right', 'Down', 'Down', 'Left',
+ 'Left', 'Left', 'Left', 'Up', 'Up', 'Right', 'Right',
+ 'Up', 'Right', 'Right', 'Right', 'Right', 'Down', 'Left',
+ 'Up', 'Left', 'Down', 'Down', 'Up', 'Up', 'Left', 'Left',
+ 'Down', 'Left', 'Left', 'Down', 'Down', 'Right', 'Right',
+ 'Right', 'Right', 'Right', 'Right', 'Down', 'Right',
+ 'Right', 'Up', 'Left', 'Left', 'Left', 'Left', 'Left',
+ 'Left', 'Down', 'Left', 'Left', 'Up', 'Up', 'Up', 'Right',
+ 'Right', 'Right', 'Up', 'Right', 'Down', 'Down', 'Up',
+ 'Left', 'Left', 'Left', 'Left', 'Down', 'Down', 'Down',
+ 'Right', 'Right', 'Up', 'Right', 'Right', 'Left', 'Left',
+ 'Down', 'Left', 'Left', 'Up', 'Right', 'Right'] ,
+179],
+["./warehouses/warehouse_81.txt",
+['Left', 'Up', 'Up', 'Up', 'Right', 'Right', 'Down', 'Left',
+ 'Down', 'Left', 'Down', 'Down', 'Down', 'Right', 'Right',
+ 'Up', 'Left', 'Down', 'Left', 'Up', 'Right', 'Up', 'Up',
+ 'Left', 'Left', 'Down', 'Right', 'Up', 'Right', 'Up',
+ 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Down',
+ 'Right', 'Down', 'Down', 'Left', 'Down', 'Down', 'Right',
+ 'Up', 'Up', 'Up', 'Down', 'Left', 'Left', 'Up', 'Right'] ,
+376],
+["./warehouses/warehouse_5n.txt",
+'Impossible',
+None],
+["./warehouses/warehouse_07.txt",
+['Up', 'Up', 'Right', 'Right', 'Up', 'Up', 'Left', 'Left',
+ 'Down', 'Down', 'Right', 'Up', 'Down', 'Right', 'Down',
+ 'Down', 'Left', 'Up', 'Down', 'Left', 'Left', 'Up', 'Left',
+ 'Up', 'Up', 'Right'],
+26],
+["./warehouses/warehouse_147.txt",
+['Left', 'Left', 'Left', 'Left', 'Left', 'Left', 'Down',
+  'Down', 'Down', 'Right', 'Right', 'Up', 'Right', 'Down',
+  'Right', 'Down', 'Down', 'Left', 'Down', 'Left', 'Left',
+  'Up', 'Up', 'Down', 'Down', 'Right', 'Right', 'Up', 'Right',
+  'Up', 'Up', 'Left', 'Left', 'Left', 'Down', 'Left', 'Up',
+  'Up', 'Up', 'Left', 'Up', 'Right', 'Right', 'Right', 'Right',
+  'Right', 'Right', 'Down', 'Right', 'Right', 'Right', 'Up',
+  'Up', 'Left', 'Left', 'Down', 'Left', 'Left', 'Left', 'Left',
+  'Left', 'Left', 'Down', 'Down', 'Down', 'Right', 'Right',
+  'Up', 'Left', 'Down', 'Left', 'Up', 'Up', 'Left', 'Up',
+  'Right', 'Right', 'Right', 'Right', 'Right', 'Right', 'Left',
+  'Left', 'Left', 'Left', 'Left', 'Down', 'Down', 'Down',
+  'Down', 'Right', 'Down', 'Down', 'Right', 'Right', 'Up', 'Up',
+  'Right', 'Up', 'Left', 'Left', 'Left', 'Down', 'Left', 'Up',
+  'Up', 'Up', 'Left', 'Up', 'Right', 'Right', 'Right', 'Right',
+  'Right', 'Down', 'Right', 'Down', 'Right', 'Right', 'Up',
+  'Left', 'Right', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down',
+  'Left', 'Left', 'Left', 'Left', 'Left', 'Left', 'Right',
+  'Right', 'Right', 'Right', 'Right', 'Right', 'Up', 'Right',
+  'Right', 'Down', 'Down', 'Left', 'Down', 'Left', 'Left', 'Up',
+  'Right', 'Right', 'Down', 'Right', 'Up', 'Left', 'Left', 'Up',
+  'Left', 'Left'],
+521],
 ]
     for index, (warehouse, expected_answer, expected_cost) in enumerate(datasets):
         wh = Warehouse()
         wh.load_warehouse(warehouse)
         # first test
-        answer, cost = solve_weighted_sokoban(wh)
+        answer = solve_weighted_sokoban(wh)
         print('<<  test_solve_weighted_sokoban >>')
+
+        if answer == 'Impossible':
+            if expected_answer == 'Impossible':
+                print(f'Test {index} Answer as expected!  :-)\n')
+            else:
+                print(f'Test {index} Your answer = {answer}, expected answer = {expected_answer}')
+            continue
+
+        answer, cost = answer
+        if answer == expected_answer:
+            print(f'Test {index} Answer as expected!  :-)\n')
+
         if cost==expected_cost:
-            print(' Cost as expected!  :-)\n')
+            print(f'Test {index} Cost as expected!  :-)\n')
         else:
-            print(f'Your cost = {cost}, expected cost = {expected_cost}')
+            print(f'Test {index} Your cost = {cost}, expected cost = {expected_cost}')
 
         my_final = check_elem_action_seq(wh, answer)
         expected_final = check_elem_action_seq(wh, expected_answer)
         
         if my_final==expected_final:
-            print(' Answer as expected!  :-)\n')
+            print('Final warehouse as expected!  :-)\n')
         else:
             print('unexpected answer!  :D\n')
             print('Expected ');print(expected_answer)
