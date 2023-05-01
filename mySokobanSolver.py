@@ -490,6 +490,7 @@ class SokobanPuzzle(search.Problem):
         Heuristic for goal state. 
         h(n) = ?
         '''
+        return 0
         raise NotImplementedError()
 
 
@@ -690,7 +691,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
             C is the total cost of the action sequence C
 
     '''
-    mode = 'bfs_box'
+    mode = 'astar_box'
 
     if mode == 'bfs_worker':
         problem = SokobanPuzzleWorker(warehouse)
@@ -706,7 +707,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         t0 = time.time()
         goal_node = search.astar_graph_search(problem)
         t1 = time.time()
-        # print('A*Worker Solver took {:.6f} seconds'.format(t1-t0))
+        print('A*Worker Solver took {:.6f} seconds'.format(t1-t0))
         # SokobanPuzzleWorker.print_solution(goal_node)
         return SokobanPuzzleWorker.parse_goal_node(goal_node)
 
