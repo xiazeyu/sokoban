@@ -16,6 +16,7 @@ marking your code, make sure that your code runs without errors with this script
 
 
 from sokoban import Warehouse
+import time
 
 
 try:
@@ -103,6 +104,7 @@ def test_check_elem_action_seq():
             print('But, received ');print(answer)
 
 def test_solve_weighted_sokoban():
+    print('<<  test_solve_weighted_sokoban >>')
     datasets = [
 ["./warehouses/warehouse_01.txt",
 ['Down', 'Left', 'Up', 'Right', 'Right', 'Right', 'Down',
@@ -183,40 +185,42 @@ None],
 521],
 ]
     for index, (warehouse, expected_answer, expected_cost) in enumerate(datasets):
+        print(f'case {index}, {warehouse}')
         wh = Warehouse()
         wh.load_warehouse(warehouse)
-        # first test
+        t0 = time.time()
         answer = solve_weighted_sokoban(wh)
-        print('<<  test_solve_weighted_sokoban >>')
+        t1 = time.time()
+        print('took {:.6f} seconds'.format(t1-t0))
+
 
         if answer == 'Impossible':
             if expected_answer == 'Impossible':
-                print(f'Test {index} Answer as expected!  :-)\n')
+                print(f'Answer as expected!  :-)\n')
             else:
-                print(f'Test {index} Your answer = {answer}, expected answer = {expected_answer}')
+                print(f'Your answer = {answer}, expected answer = {expected_answer}')
             continue
 
         answer, cost = answer
         if answer == expected_answer:
-            print(f'Test {index} Answer as expected!  :-)\n')
+            print(f'Answer as expected!  :-)\n')
 
         if cost==expected_cost:
-            print(f'Test {index} Cost as expected!  :-)\n')
+            print(f'Cost as expected!  :-)\n')
         else:
-            print(f'Test {index} Your cost = {cost}, expected cost = {expected_cost}')
+            print(f'Your cost = {cost}, expected cost = {expected_cost}')
 
         my_final = check_elem_action_seq(wh, answer)
         expected_final = check_elem_action_seq(wh, expected_answer)
         
         if my_final==expected_final:
-            print('Final warehouse as expected!  :-)\n')
+            print('Final as expected!  :-)\n')
         else:
             print('unexpected answer!  :D\n')
             print('Expected ');print(expected_answer)
             print('But, received ');print(answer)
             print('Expected final ');print(expected_final)
             print('But, received final ');print(my_final)
-            print('Check that you pushed the right box onto the left target!')
 
 if __name__ == "__main__":
     print(my_team())  # should print your team
