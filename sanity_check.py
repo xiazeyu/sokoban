@@ -28,8 +28,7 @@ except ModuleNotFoundError:
     
 def test_taboo_cells():
     datasets = [
-        [
-"./warehouses/warehouse_01.txt",
+["./warehouses/warehouse_01.txt",
 '''####  
 #X #  
 #  ###
@@ -37,6 +36,31 @@ def test_taboo_cells():
 #   X#
 #XX###
 ####  '''],
+["./warehouses/taboo_test_01.txt",
+'''####  
+#XX#  
+## ###
+#X  X#
+#X  X#
+#X ###
+####  '''],
+["./warehouses/taboo_test_02.txt",
+'''   # # # # #  
+ ##X#X#X#X# # 
+#XXXXXXXXXXXX#
+#XX#X#X#X#X#X#
+### # # # # # '''],
+["./warehouses/taboo_test_03.txt",
+'''########
+#X     #
+########'''],
+["./warehouses/taboo_test_04.txt",
+'''########
+#XXXXXX#
+#X     #
+#X     #
+#X    X#
+########'''],
     ]
     for index, (warehouse, expected_answer) in enumerate(datasets):
         wh = Warehouse()
@@ -50,59 +74,68 @@ def test_taboo_cells():
             print(fcn.__name__, f' failed for {index}!  :-(\n')
             print('Expected ');print(expected_answer)
             print('But, received ');print(answer)
-        
+
 def test_check_elem_action_seq():
-    wh = Warehouse()
-    wh.load_warehouse("./warehouses/warehouse_01.txt")
-    # first test
-    answer = check_elem_action_seq(wh, ['Right', 'Right','Down'])
-    expected_answer = '####  \n# .#  \n#  ###\n#*   #\n#  $@#\n#  ###\n####  '
-    print('<<  check_elem_action_seq, test 1>>')
-    if answer==expected_answer:
-        print('Test 1 passed!  :-)\n')
-    else:
-        print('Test 1 failed!  :-(\n')
-        print('Expected ');print(expected_answer)
-        print('But, received ');print(answer)
-    # second test
-    answer = check_elem_action_seq(wh, ['Right', 'Right','Right'])
-    expected_answer = 'Impossible'
-    print('<<  check_elem_action_seq, test 2>>')
-    if answer==expected_answer:
-        print('Test 2 passed!  :-)\n')
-    else:
-        print('Test 2 failed!  :-(\n')
-        print('Expected ');print(expected_answer)
-        print('But, received ');print(answer)
-
-
+    datasets = [
+["./warehouses/warehouse_01.txt",
+['Right', 'Right','Down'],
+'''####  
+# .#  
+#  ###
+#*   #
+#  $@#
+#  ###
+####  '''],
+["./warehouses/warehouse_01.txt",
+['Right', 'Right','Right'],
+'Impossible'],
+]
+    for index, (warehouse, input, expected_answer) in enumerate(datasets):
+        wh = Warehouse()
+        wh.load_warehouse(warehouse)
+        answer = check_elem_action_seq(wh, input)
+        print(f'<<  check_elem_action_seq, test {index}>>')
+        if answer==expected_answer:
+            print(f'Test {index} passed!  :-)\n')
+        else:
+            print(f'Test {index} failed!  :-(\n')
+            print('Expected ');print(expected_answer)
+            print('But, received ');print(answer)
 
 def test_solve_weighted_sokoban():
-    wh = Warehouse()    
-    wh.load_warehouse( "./warehouses/warehouse_8a.txt")
-    # first test
-    answer, cost = solve_weighted_sokoban(wh)
+    datasets = [
+["./warehouses/warehouse_01.txt",
+['Up', 'Left', 'Up', 'Left', 'Left', 'Down', 'Left', 
+'Down', 'Right', 'Right', 'Right', 'Up', 'Up', 'Left', 
+'Down', 'Right', 'Down', 'Left', 'Left', 'Right', 
+'Right', 'Right', 'Right', 'Right', 'Right', 'Right'],
+431],
+]
+    for index, (warehouse, expected_answer, expected_cost) in enumerate(datasets):
+        wh = Warehouse()
+        wh.load_warehouse(warehouse)
+        # first test
+        answer, cost = solve_weighted_sokoban(wh)
+        print('<<  test_solve_weighted_sokoban >>')
+        if cost==expected_cost:
+            print(' Cost as expected!  :-)\n')
+        else:
+            print(f'Your cost = {cost}, expected cost = {expected_cost}')
 
-    expected_answer = ['Up', 'Left', 'Up', 'Left', 'Left', 'Down', 'Left', 
-                       'Down', 'Right', 'Right', 'Right', 'Up', 'Up', 'Left', 
-                       'Down', 'Right', 'Down', 'Left', 'Left', 'Right', 
-                       'Right', 'Right', 'Right', 'Right', 'Right', 'Right'] 
-    expected_cost = 431
-    print('<<  test_solve_weighted_sokoban >>')
-    if answer==expected_answer:
-        print(' Answer as expected!  :-)\n')
-    else:
-        print('unexpected answer!  :-(\n')
-        print('Expected ');print(expected_answer)
-        print('But, received ');print(answer)
-        print('Your answer is different but it might still be correct')
-        print('Check that you pushed the right box onto the left target!')
-    print(f'Your cost = {cost}, expected cost = {expected_cost}')
+        my_final = check_elem_action_seq(wh, answer)
+        expected_final = check_elem_action_seq(wh, expected_answer)
         
-    
+        if my_final==expected_final:
+            print(' Answer as expected!  :-)\n')
+        else:
+            print('unexpected answer!  :D\n')
+            print('Expected ');print(expected_answer)
+            print('But, received ');print(answer)
+            print('Expected final ');print(expected_final)
+            print('But, received final ');print(my_final)
+            print('Check that you pushed the right box onto the left target!')
 
 if __name__ == "__main__":
-    pass    
     print(my_team())  # should print your team
 
     test_taboo_cells() 

@@ -25,18 +25,13 @@ Last modified by 2022-03-27  by f.maire@qut.edu.au
 
 '''
 
-# You have to make sure that your code works with
-# the files provided (search.py and sokoban.py) as your code will be tested
-# with these files
+import copy
+import functools
 import itertools
+import math
+import operator
 import search
 import sokoban
-
-from typing import Callable
-import functools
-import operator
-import copy
-import math
 import time
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -45,26 +40,26 @@ _actions_offset: list[list[int, int, str]] = [
     [-1, 0, 'h'], [1, 0, 'h'], [0, -1, 'v'], [0, 1, 'v']]
 # Left, Right, Up, Down; v: vertical, h: horizontal
 _moves: dict[tuple[int, int]] = {
-    'Left': (-1, 0), 'Right': (1, 0), 'Up': (0, -1), 'Down': (0, 1)}  # (x,y) = (column,row)
+    'Left': (-1, 0), 'Right': (1, 0), 'Up': (0, -1), 'Down': (0, 1)}
+# (x,y) = (column,row)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
 def my_team() -> list[tuple[int, str, str]]:
-    '''
-    Return the list of the team members of this assignment submission as a list
-    of triplet of the form (student_number, first_name, last_name)
+    """
+    Returns
+    -------
+    list[tuple[int, str, str]]
+        The list of the team members of this assessment submission as a list of
+        triplet of the form (student_number, first_name, last_name).
 
-    '''
+    """
     return [(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
-
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
-def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
-    '''  
-
+def _taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
+    """
     The solver for taboo cells puzzles.
 
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
@@ -75,18 +70,23 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
     outside cell as taboo.
 
     When determining the taboo cells, you must ignore all the existing boxes, 
-    only consider the walls and the target  cells.  
+    only consider the walls and the target cells.  
     Use only the following rules to determine the taboo cells;
      Rule 1: if a cell is a corner and not a target, then it is a taboo cell.
      Rule 2: all the cells between two corners along a wall are taboo if none of 
              these cells is a target.
 
-    @param warehouse: 
-        a Warehouse object with the worker inside the warehouse
+    Parameters
+    ----------
+    warehouse : sokoban.Warehouse
+        a Warehouse object with the worker inside the warehouse.
 
-    @return
-       A list of tuple contains the coordinates of the cells identified as taboo cells. 
-    '''
+    Returns
+    -------
+    list[tuple[int, int]]
+        A list of tuple contains the coordinates of the cells identified as taboo cells.
+
+    """
 
     taboo: list[tuple[int, int]] = []
     corner: list[tuple[int, int]] = []
@@ -109,6 +109,7 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
                 # count wall cells around current cell
                 wall_counter[new_dir] += 1
             else:
+                # add new cell to frontier
                 frontier.append(new_pos)
 
         # a corner appears if both direction have at least one wall
@@ -126,6 +127,9 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
         # if cells between corners are along a wall, they should have same x or y position
         # Rule 2: all the cells between two corners along a wall are taboo if none of
         #         these cells is a target.
+        if corner_a not in taboo or corner_b not in taboo:
+            # if either corner is not taboo, then the cells between them are not taboo
+            continue
         if corner_a[0] == corner_b[0]:
             cell_x = corner_a[0]
             # x fixed to corner_a[0]
@@ -135,7 +139,7 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
             for cell_y in range(min(corner_a[1], corner_b[1]) + 1, max(corner_a[1], corner_b[1])):
                 if (((cell_x-1, cell_y) not in warehouse.walls  # along a left-side wall
                     and (cell_x+1, cell_y) not in warehouse.walls)  # along a right-side wall
-                        or (cell_x, cell_y) in warehouse.targets):  # cell is a target
+                        or (cell_x, cell_y) in warehouse.targets + warehouse.walls):  # cell is a target or wall
 
                     continuous_taboo = False
                     break
@@ -153,7 +157,7 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
             for cell_x in range(min(corner_a[0], corner_b[0]) + 1, max(corner_a[0], corner_b[0])):
                 if (((cell_x, cell_y-1) not in warehouse.walls  # along a down-side wall
                     and (cell_x, cell_y+1) not in warehouse.walls)  # along a up-side wall
-                        or (cell_x, cell_y) in warehouse.targets):  # cell is a target
+                        or (cell_x, cell_y) in warehouse.targets + warehouse.walls):  # cell is a target or wall
 
                     continuous_taboo = False
                     break
@@ -166,9 +170,52 @@ def taboo_cells_solver(warehouse: sokoban.Warehouse) -> list[tuple[int, int]]:
     return list(set(taboo))
 
 
-def taboo_cells(warehouse: sokoban.Warehouse) -> str:
-    '''  
+def replace_str_index(text: str, index: int, replacement: str) -> str:
+    """
+    Repace the string with a char at given index.
 
+    Parameters
+    ----------
+    text : str
+        Original string.
+    index : int
+        Index to replace.
+    replacement : str
+        Single character.
+
+    Returns
+    -------
+    str
+        Replaced string.
+
+    """
+    return f'{text[:index]}{replacement}{text[index+1:]}'
+
+def replace_str_2d(text: str, index: tuple[int, int], replacement: str) -> list[str]:
+    """
+    Replace the string (in 2D addressing mode) with given char.
+    Index starts at (0, 0).
+
+    Parameters
+    ----------
+    text : str
+        List of string.
+    index : tuple[int, int]
+        Tuple of index, representing x and y.
+    replacement : str
+        Single character.
+
+    Returns
+    -------
+    list[str]
+        Replaced string array.
+
+    """
+    text[index[1]] = replace_str_index(text[index[1]], index[0], replacement)
+    return text
+
+def taboo_cells(warehouse: sokoban.Warehouse) -> str:
+    """
     A wrapper for taboo cells solver, which returns a string representation.
 
     Identify the taboo cells of a warehouse. A "taboo cell" is by definition
@@ -185,16 +232,21 @@ def taboo_cells(warehouse: sokoban.Warehouse) -> str:
      Rule 2: all the cells between two corners along a wall are taboo if none of 
              these cells is a target.
 
-    @param warehouse: 
-        a Warehouse object with the worker inside the warehouse
+    Parameters
+    ----------
+    warehouse : sokoban.Warehouse
+        a Warehouse object with the worker inside the warehouse.
 
-    @return
-       A string representing the warehouse with only the wall cells marked with 
+    Returns
+    -------
+    str
+        A string representing the warehouse with only the wall cells marked with 
        a '#' and the taboo cells marked with a 'X'.  
        The returned string should NOT have marks for the worker, the targets,
-       and the boxes.  
-    '''
-    taboo = taboo_cells_solver(warehouse)
+       and the boxes.
+
+    """
+    taboo = _taboo_cells_solver(warehouse)
 
     returned = str(warehouse).replace("$", " ").replace(
         ".", " ").replace("@", " ").replace("!", " ").replace("*", " ")
@@ -206,8 +258,7 @@ def taboo_cells(warehouse: sokoban.Warehouse) -> str:
     return '\n'.join(returned)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
+# Stops here.
 class State:
     '''
     The class 'State' represents a state of a Sokoban puzzle.
@@ -269,7 +320,7 @@ class SokobanPuzzle(search.Problem):
     def __init__(self, warehouse: sokoban.Warehouse) -> None:
         self.warehouse = warehouse.copy()
         self.initial = State(worker=warehouse.worker, boxes=warehouse.boxes)
-        self.taboo_cells = taboo_cells_solver(warehouse)
+        self.taboo_cells = _taboo_cells_solver(warehouse)
         self.weights = warehouse.weights
         self.targets = warehouse.targets
         self.walls = warehouse.walls
@@ -400,17 +451,23 @@ class SokobanPuzzle(search.Problem):
                 start = parent_state.worker
                 end_box = node.state.worker
                 end = end_box[0]-ldx, end_box[1]-ldy
-                cost_map = self._dist_map(parent_state, start)
+                cost_map = self.worker_cost(parent_state)
+                assert len(cost_map) == self.ncols
+                assert len(cost_map[0]) == self.nrows
                 mid_path = []
+                assert self.in_range(start)
+                assert self.in_range(end)
                 while end != start:
                     # find the direction of the move
                     for direction in _moves:
                         dx, dy = _moves[direction]
+                        assert cost_map[end[0]][end[1]] != math.inf
                         if not self.in_range((end[0]+dx, end[1]+dy)):
                             # out of range
                             continue
                         if cost_map[end[0]-dx][end[1]-dy] == cost_map[end[0]][end[1]] - 1:
                             mid_path.append(direction)
+                            assert cost_map[end[0]-dx][end[1]-dy] != math.inf
                             end = (end[0]-dx, end[1]-dy)
                             break
                 answer.extend(reversed(mid_path))
@@ -630,7 +687,7 @@ class SokobanPuzzleWorker(SokobanPuzzle):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]):
+def check_elem_action_seq(warehouse: sokoban.Warehouse, action_seq: list[str]) -> str:
     '''
 
     Determine if the sequence of actions listed in 'action_seq' is legal or not.
@@ -730,51 +787,3 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse):
         return problem.parse_goal_node(goal_node)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-def replace_str_index(text: str, index: int, replacement: str):
-    '''
-    Repace the string with a char at given index.
-
-    Parameters
-    ----------
-    text : str
-        Original string.
-    index : int
-        Index to replace.
-    replacement : str
-        Single character.
-
-    Returns
-    -------
-    str
-        Replaced string.
-
-    '''
-    return f'{text[:index]}{replacement}{text[index+1:]}'
-
-
-def replace_str_2d(text: str, index: int, replacement: str):
-    '''
-    Replace the string (in 2D addressing mode) with given char.
-    Index starts at (0, 0).
-
-    NOTICE: This function have side-effects, which means it changes original list.
-
-    Parameters
-    ----------
-    text : list
-        List of string.
-    index : tuple
-        Tuple of index, representing x and y.
-    replacement : str
-        Single character.
-
-    Returns
-    -------
-    str
-        Replaced string.
-
-    '''
-    text[index[1]] = replace_str_index(text[index[1]], index[0], replacement)
-    return text
