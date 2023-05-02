@@ -353,6 +353,9 @@ def test_solve_weighted_sokoban_speed():
         print('---------------------------')
 
     print(result)
+    f = open('result.txt', 'w')
+    f.write(str(result))
+    f.close()
 
 @timeout_decorator.timeout(seconds=300)
 def _perform_sokoban_speed_test(warehouse):
@@ -362,7 +365,7 @@ def _perform_sokoban_speed_test(warehouse):
 
 
 if __name__ == "__main__":
-    print(my_team())  # should print your team
+    # print(my_team())  # should print your team
 
     test_solve_weighted_sokoban_speed()
 
