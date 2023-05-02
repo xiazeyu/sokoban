@@ -30,7 +30,11 @@ For usage, most operations in the Problem class are driven by State. For example
 Since a State only represents the current situation, there is no difference between the State of the box-driven model and the State of the worker-driven model.
 
 #### Heuristics
+Heuristics refer to functions that estimate the cost of the cheapest path from a given node to the goal node. With heuristics, a Dijkstra algorithm with a big O of (n^2) can become an A* algorithm with an O of (nlogn) by filtering out inefficient situations. However, the limitation of heuristics is that it is still not the actual correct cost, so if the weight of the heuristic evaluation is too high relative to the path costs, the algorithm may behave more like a greedy search, which will not always return the lowest cost solution.
 
+There are five heuristics implemented in this project for both the box-driven model and the worker-driven model. These include no heuristics, heuristics based on the average Manhattan distance between targets and boxes, heuristics based on the Manhattan distance of each paired target and box, heuristics based on the average Dijkstra cost from boxes to targets, and heuristics based on the Dijkstra costs from paired boxes to targets.
+
+[the description of each heuristics ]
 
 #### Important Features
 
