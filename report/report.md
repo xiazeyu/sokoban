@@ -24,7 +24,16 @@ In this problem,
 • Where do you think static things should go? Problem instance or state?
 • Where do you think dynamic things should go? Problem instance or state?
 
+There are two similar objects in the structure, one is Problem, another is State. 
+
+Problem describing everything while the game start, the worker, boxes, targets and walls position will be included, besides, the boxes' weight will be given in the order of boxes as well. 
+
+A state represents a situation of the game. For example, if worker moves up and pushes the box A, it will return a new State rather than a Problem. 
+
+To use a State, rather than a new Problem, is for saving resources. Because not all fields will be modified during the simulation process, the storage of duplicate data would be wasted. in this project, only the boxes and worker position are movable, so only these two will be included in a state.
+
 #### Heuristics
+
 
 #### Important Features
 
