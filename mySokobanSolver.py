@@ -709,7 +709,7 @@ class SokobanPuzzle(search.Problem):
                     Q.append(((x + dx, y + dy), dist[x + dx][y + dy]))
 
         return dist
-    
+
     def uniform_cost_search_h(self, node: search.Node) -> int:
         # no heuristic
         # this becomes uniform_cost_search
@@ -719,30 +719,34 @@ class SokobanPuzzle(search.Problem):
         # calculate the sum of the manhattan distance from the worker to the nearest target
         cost = 0
         for box_index, box in enumerate(node.state.boxes):
-            cost += min(manhattan_distance(box, target) for target in self.targets) * self.weights[box_index]
+            cost += min(manhattan_distance(box, target)
+                        for target in self.targets) * (self.weights[box_index]+1)
         return cost / len(node.state.boxes)
 
     def match_target_manhattan_sum_h(self, node: search.Node) -> int:
         # match the boxes to the targets and calculate the sum of the manhattan distance
         cost = math.inf
-        matches = [list(zip(node.state.boxes, _)) for _ in itertools.permutations(self.targets)]
+        matches = [list(zip(node.state.boxes, _))
+                   for _ in itertools.permutations(self.targets)]
         for match in matches:
             match_cost = 0
             for index, (box, target) in enumerate(match):
-                match_cost += manhattan_distance(box, target) * self.weights[index]
+                match_cost += manhattan_distance(box,
+                                                 target) * (self.weights[index] + 1)
             cost = min(cost, match_cost)
 
         return cost / len(node.state.boxes)
 
     def match_target_hungarian_manhattan_sum_h(self, node: search.Node) -> int:
         # match the boxes to the targets using hungarian algorithm and calculate the sum of the manhattan distance
-        
+
         boxes = node.state.boxes
-        cost_matrix=np.zeros((self.ncols,self.nrows))
+        cost_matrix = np.zeros((self.ncols, self.nrows))
         for g_idx in range(len(self.targets)):
             for b_idx in range(len(boxes)):
-                cost_matrix[g_idx, b_idx] = manhattan_distance(self.targets[g_idx], boxes[b_idx]) * self.weights[b_idx]
-        row_ind, col_ind=scipy.optimize.linear_sum_assignment(cost_matrix)
+                cost_matrix[g_idx, b_idx] = manhattan_distance(
+                    self.targets[g_idx], boxes[b_idx]) * (self.weights[b_idx]+1)
+        row_ind, col_ind = scipy.optimize.linear_sum_assignment(cost_matrix)
         cost = cost_matrix[row_ind, col_ind].sum()
 
         return cost / len(node.state.boxes)
@@ -751,38 +755,40 @@ class SokobanPuzzle(search.Problem):
         # calculate the sum of the dijkstra distance from the worker to the nearest target
         cost = 0
         for box_index, box in enumerate(node.state.boxes):
-            cost += min(self._dist_map(node.state, box)[target[0]][target[1]] for target in self.targets) * self.weights[box_index]
+            cost += min(self._dist_map(node.state, box)[target[0]][target[1]]
+                        for target in self.targets) * (self.weights[box_index]+1)
         return cost / len(node.state.boxes)
 
     def match_target_dijkstra_sum_h(self, node: search.Node) -> int:
         # match the boxes to the targets, and calculate the sum of the dijkstra distance from the worker to the nearest target
         cost = math.inf
-        matches = [list(zip(node.state.boxes, _)) for _ in itertools.permutations(self.targets)]
+        matches = [list(zip(node.state.boxes, _))
+                   for _ in itertools.permutations(self.targets)]
         for match in matches:
             match_cost = 0
             for index, (box, target) in enumerate(match):
-                match_cost += self._dist_map(node.state, box)[target[0]][target[1]] * self.weights[index]
+                match_cost += self._dist_map(node.state, box)[
+                    target[0]][target[1]] * (self.weights[index]+1)
                 # print(match_cost)
             cost = min(cost, match_cost)
 
         return cost / len(node.state.boxes)
 
-
     def match_target_hungarian_dijkstra_sum_h(self, node: search.Node) -> int:
         # match the boxes to the targets using hungarian algorithm, and calculate the sum of the dijkstra distance from the worker to the nearest target
         boxes = node.state.boxes
-        cost_matrix=np.zeros((self.ncols,self.nrows))
+        cost_matrix = np.zeros((self.ncols, self.nrows))
         for g_idx in range(len(self.targets)):
             for b_idx in range(len(boxes)):
                 goal = self.targets[g_idx]
                 box = boxes[b_idx]
-                cost_matrix[g_idx, b_idx] = self._dist_map(node.state, box)[goal[0]][goal[1]] * self.weights[b_idx]
+                cost_matrix[g_idx, b_idx] = self._dist_map(
+                    node.state, box)[goal[0]][goal[1]] * (self.weights[b_idx]+1)
         # print(cost_matrix)
-        row_ind, col_ind=scipy.optimize.linear_sum_assignment(cost_matrix)
+        row_ind, col_ind = scipy.optimize.linear_sum_assignment(cost_matrix)
         cost = cost_matrix[row_ind, col_ind].sum()
 
         return cost / len(node.state.boxes)
-
 
     def h(self, node: search.Node) -> int:
         """
@@ -801,7 +807,7 @@ class SokobanPuzzle(search.Problem):
             The heuristic value.
 
         """
-        return self.match_target_hungarian_dijkstra_sum_h(node)
+        return self.nearest_target_manhattan_sum_h(node)
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):
