@@ -338,7 +338,7 @@ def test_solve_weighted_sokoban_speed():
     result = {}
     for index, dataset in enumerate(datasets):
         print('---------------------------')
-        print(f'case {index}, {dataset}')
+        print(f'case {index}, {dataset} / {len(datasets)}')
         wh_path=f'./warehouses/warehouse_{dataset}.txt'
         t0 = time.time()
         try:
@@ -354,7 +354,7 @@ def test_solve_weighted_sokoban_speed():
 
     print(result)
 
-@timeout_decorator.timeout(seconds=360)
+@timeout_decorator.timeout(seconds=300)
 def _perform_sokoban_speed_test(warehouse):
     wh = Warehouse()
     wh.load_warehouse(warehouse)

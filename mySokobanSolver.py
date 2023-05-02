@@ -809,7 +809,7 @@ class SokobanPuzzle(search.Problem):
             The heuristic value.
 
         """
-        return self.nearest_manhattan_sum_h(node)
+        return self.uniform_cost_search_h(node)
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):
@@ -1009,7 +1009,7 @@ def solve_weighted_sokoban(warehouse: sokoban.Warehouse) -> tuple[list[str], int
             return 'Impossible', None
 
     """
-    mode = 'astar_worker'
+    mode = 'astar_box'
 
     if mode == 'bfs_worker':
         problem = SokobanPuzzleWorker(warehouse)
