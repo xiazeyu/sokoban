@@ -17,7 +17,7 @@ marking your code, make sure that your code runs without errors with this script
 
 from sokoban import Warehouse
 import time
-
+import timeout_decorator
 
 try:
     from fredSokobanSolver import taboo_cells, solve_weighted_sokoban, check_elem_action_seq
@@ -225,11 +225,147 @@ None],
             print('But, received final ');print(my_final)
 
 def test_solve_weighted_sokoban_speed():
-    pass
+    datasets = [
+        "01",
+        "01_a",
+        "03",
+        "03_impossible",
+        "07",
+        "09",
+        "101",
+        "103",
+        "105",
+        "107",
+        "109",
+        "11",
+        "111",
+        "113",
+        "115",
+        "117",
+        "119",
+        "121",
+        "123",
+        "125",
+        "127",
+        "129",
+        "13",
+        "131",
+        "133",
+        "135",
+        "137",
+        "139",
+        "141",
+        "143",
+        "145",
+        "147",
+        "149",
+        "15",
+        "151",
+        "153",
+        "155",
+        "157",
+        "159",
+        "161",
+        "163",
+        "165",
+        "167",
+        "169",
+        "17",
+        "171",
+        "173",
+        "175",
+        "177",
+        "179",
+        "181",
+        "183",
+        "185",
+        "187",
+        "189",
+        "19",
+        "191",
+        "193",
+        "195",
+        "197",
+        "199",
+        "201",
+        "203",
+        "205",
+        "21",
+        "23",
+        "25",
+        "27",
+        "29",
+        "31",
+        "33",
+        "35",
+        "37",
+        "39",
+        "41",
+        "43",
+        "45",
+        "47",
+        "49",
+        "51",
+        "53",
+        "55",
+        "57",
+        "59",
+        "5n",
+        "61",
+        "63",
+        "65",
+        "67",
+        "69",
+        "6n",
+        "71",
+        "73",
+        "75",
+        "77",
+        "79",
+        "81",
+        "83",
+        "85",
+        "87",
+        "89",
+        "8a",
+        "8b",
+        "91",
+        "93",
+        "95",
+        "97",
+        "99",
+    ]
+    result = {}
+    for index, dataset in enumerate(datasets):
+        print('---------------------------')
+        print(f'case {index}, {dataset}')
+        wh_path=f'./warehouses/warehouse_{dataset}.txt'
+        t0 = time.time()
+        try:
+            _perform_sokoban_speed_test(wh_path)
+        except:
+            print('Fail')
+            result[dataset] = '-1'
+            continue
+        t1 = time.time()
+        result[dataset] = t1-t0
+        print('{:.6f} seconds'.format(t1-t0))
+        print('---------------------------')
+
+    print(result)
+
+@timeout_decorator.timeout(seconds=360)
+def _perform_sokoban_speed_test(warehouse):
+    wh = Warehouse()
+    wh.load_warehouse(warehouse)
+    solve_weighted_sokoban(wh)
+
 
 if __name__ == "__main__":
     print(my_team())  # should print your team
 
-    test_taboo_cells() 
-    test_check_elem_action_seq()
-    test_solve_weighted_sokoban()
+    test_solve_weighted_sokoban_speed()
+
+    # test_taboo_cells() 
+    # test_check_elem_action_seq()
+    # test_solve_weighted_sokoban()
