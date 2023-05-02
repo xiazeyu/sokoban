@@ -721,7 +721,7 @@ class SokobanPuzzle(search.Problem):
         for box_index, box in enumerate(node.state.boxes):
             cost += min(manhattan_distance(box, target)
                         for target in self.targets) * (self.weights[box_index]+1)
-        return cost / len(node.state.boxes)
+        return cost
 
     def permutation_manhattan_sum_h(self, node):
         # match the boxes to the targets and calculate the sum of the manhattan distance
