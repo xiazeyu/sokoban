@@ -1,0 +1,92 @@
+Using submitted solver
+[(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 0!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 1!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 2!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 3!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 4!  :-)
+
+<<  check_elem_action_seq, test 0>>
+Test 0 passed!  :-)
+
+<<  check_elem_action_seq, test 1>>
+Test 1 passed!  :-)
+
+<<  test_solve_weighted_sokoban >>
+case 0, ./warehouses/warehouse_01.txt
+A* Worker Solver
+took 0.013117 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 1, ./warehouses/warehouse_8a.txt
+A* Worker Solver
+took 2.076516 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 2, ./warehouses/warehouse_09.txt
+A* Worker Solver
+took 0.015882 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 3, ./warehouses/warehouse_47.txt
+A* Worker Solver
+took 0.600644 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 4, ./warehouses/warehouse_81.txt
+A* Worker Solver
+took 16.467366 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 5, ./warehouses/warehouse_5n.txt
+^CTraceback (most recent call last):
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/sanity_check.py", line 235, in <module>
+    test_solve_weighted_sokoban()
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/sanity_check.py", line 192, in test_solve_weighted_sokoban
+    answer = solve_weighted_sokoban(wh)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/mySokobanSolver.py", line 1020, in solve_weighted_sokoban
+    elif mode == 'astar_worker':
+                    ^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 470, in astar_graph_search
+    return best_first_graph_search(problem, lambda n: n.path_cost + h(n))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 412, in best_first_graph_search
+    if child.state not in explored and child not in frontier:
+                                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 148, in __contains__
+    return any([item == key for _, item in self.heap])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 148, in <listcomp>
+    return any([item == key for _, item in self.heap])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

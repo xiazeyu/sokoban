@@ -1,0 +1,93 @@
+Using submitted solver
+[(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 0!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 1!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 2!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 3!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 4!  :-)
+
+<<  check_elem_action_seq, test 0>>
+Test 0 passed!  :-)
+
+<<  check_elem_action_seq, test 1>>
+Test 1 passed!  :-)
+
+<<  test_solve_weighted_sokoban >>
+case 0, ./warehouses/warehouse_01.txt
+BFS Worker Solver
+took 0.009778 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 1, ./warehouses/warehouse_8a.txt
+BFS Worker Solver
+took 0.984418 seconds
+Steps are not the same, but don't worries!
+Your cost = 713, expected cost = 431
+Final as expected!  :-)
+
+case 2, ./warehouses/warehouse_09.txt
+BFS Worker Solver
+took 0.012677 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 3, ./warehouses/warehouse_47.txt
+BFS Worker Solver
+took 0.616730 seconds
+Steps are not the same, but don't worries!
+Your cost = 281, expected cost = 179
+Final as expected!  :-)
+
+case 4, ./warehouses/warehouse_81.txt
+BFS Worker Solver
+took 13.338222 seconds
+Steps are not the same, but don't worries!
+Your cost = 466, expected cost = 376
+Final as expected!  :-)
+
+case 5, ./warehouses/warehouse_5n.txt
+BFS Worker Solver
+took 427.683380 seconds
+Answer as expected, Impossible!  :-)
+
+case 6, ./warehouses/warehouse_07.txt
+^CTraceback (most recent call last):
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/sanity_check.py", line 235, in <module>
+    test_solve_weighted_sokoban()
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/sanity_check.py", line 192, in test_solve_weighted_sokoban
+    answer = solve_weighted_sokoban(wh)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/mySokobanSolver.py", line 1014, in solve_weighted_sokoban
+    goal_node = search.breadth_first_graph_search(problem)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 354, in breadth_first_graph_search
+    return graph_search(problem, FIFOQueue())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 331, in graph_search
+    frontier.extend(child for child in node.expand(problem)
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 333, in <genexpr>
+    and child not in frontier)
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/search.py", line 281, in __eq__
+    return isinstance(other, Node) and self.state == other.state
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/zeyuxia/Documents/github.com/xiazeyu/sokoban/mySokobanSolver.py", line 297, in __eq__
+    def __eq__(self, other) -> bool:
+
+KeyboardInterrupt

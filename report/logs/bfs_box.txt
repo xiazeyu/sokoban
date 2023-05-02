@@ -1,0 +1,127 @@
+Using submitted solver
+[(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 0!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 1!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 2!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 3!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 4!  :-)
+
+<<  check_elem_action_seq, test 0>>
+Test 0 passed!  :-)
+
+<<  check_elem_action_seq, test 1>>
+Test 1 passed!  :-)
+
+<<  test_solve_weighted_sokoban >>
+case 0, ./warehouses/warehouse_01.txt
+BFS Box Solver
+took 0.001864 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 1, ./warehouses/warehouse_8a.txt
+BFS Box Solver
+took 0.116932 seconds
+Steps are not the same, but don't worries!
+Your cost = 717, expected cost = 431
+Final as expected!  :-)
+
+case 2, ./warehouses/warehouse_09.txt
+BFS Box Solver
+took 0.000875 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 3, ./warehouses/warehouse_47.txt
+BFS Box Solver
+took 0.035758 seconds
+Steps are not the same, but don't worries!
+Your cost = 281, expected cost = 179
+Final as expected!  :-)
+
+case 4, ./warehouses/warehouse_81.txt
+BFS Box Solver
+took 0.042432 seconds
+Steps are not the same, but don't worries!
+Your cost = 472, expected cost = 376
+unexpected answer!  :D
+
+Expected
+['Left', 'Up', 'Up', 'Up', 'Right', 'Right', 'Down', 'Left', 'Down', 'Left', 'Down', 'Down', 'Down', 'Right', 'Right', 'Up', 'Left', 'Down', 'Left', 'Up', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Right', 'Up', 'Right', 'Up', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right', 'Down', 'Down', 'Left', 'Down', 'Down', 'Right', 'Up', 'Up', 'Up', 'Down', 'Left', 'Left', 'Up', 'Right']
+But, received
+['Left', 'Up', 'Up', 'Up', 'Right', 'Right', 'Down', 'Left', 'Down', 'Left', 'Down', 'Down', 'Down', 'Right', 'Right', 'Up', 'Left', 'Up', 'Up', 'Up', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right', 'Down', 'Down', 'Left', 'Left', 'Up', 'Right', 'Down', 'Right', 'Up', 'Down', 'Down', 'Down', 'Left', 'Up', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Right', 'Down', 'Right', 'Up']
+Expected final
+ #####
+ #   #
+ # * #
+## * #
+# @*##
+#   ##
+##   #
+ #   #
+ #####
+But, received final
+ #####
+ #   #
+ # * #
+## * #
+#  *##
+#  @##
+##   #
+ #   #
+ #####
+case 5, ./warehouses/warehouse_5n.txt
+BFS Box Solver
+took 0.145287 seconds
+Answer as expected, Impossible!  :-)
+
+case 6, ./warehouses/warehouse_07.txt
+BFS Box Solver
+took 20.201662 seconds
+Steps are not the same, but don't worries!
+Your cost = 38, expected cost = 26
+unexpected answer!  :D
+
+Expected
+['Up', 'Up', 'Right', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right', 'Up', 'Down', 'Right', 'Down', 'Down', 'Left', 'Up', 'Down', 'Left', 'Left', 'Up', 'Left', 'Up', 'Up', 'Right']
+But, received
+['Right', 'Right', 'Up', 'Up', 'Up', 'Up', 'Left', 'Left', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right', 'Down', 'Left', 'Down', 'Down', 'Right', 'Right', 'Right', 'Right', 'Up', 'Up', 'Left', 'Up', 'Down', 'Left', 'Down', 'Down', 'Left', 'Left', 'Up', 'Right', 'Down', 'Right', 'Right', 'Up']
+Expected final
+#######
+#     #
+# * * #
+# @*  #
+# * * #
+#  *  #
+#     #
+#######
+But, received final
+#######
+#     #
+# * * #
+#  *  #
+# * * #
+#  *@ #
+#     #
+#######
+case 7, ./warehouses/warehouse_147.txt
+BFS Box Solver
+took 8.397333 seconds
+Steps are not the same, but don't worries!
+Your cost = 532, expected cost = 521
+Final as expected!  :-)
