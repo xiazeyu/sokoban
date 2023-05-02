@@ -21,18 +21,13 @@ Both modes will be compared in further reports, but only one will be named Sokob
 
 
 #### State
-Think about what is static and what is dynamic in the problem.
-In this problem, 
-• Where do you think static things should go? Problem instance or state?
-• Where do you think dynamic things should go? Problem instance or state?
+There are two main objects used to simulate the play environment: Problem and State. The Problem object describes everything at the start of the game, including the worker, boxes, targets, and walls position, as well as the weight of the boxes in the order they appear.
 
-There are two similar objects in the structure, one is Problem, another is State. 
+The State object represents a game situation, such as when the worker moves up and pushes box A. Rather than creating a new Problem object, the simulation returns a new State. This approach is more resource-efficient since not all fields are modified during the simulation process, and storing duplicate data would be wasteful. In Sokoban, only the boxes and worker positions are movable, so only these fields are included in a State.
 
-Problem describing everything while the game start, the worker, boxes, targets and walls position will be included, besides, the boxes' weight will be given in the order of boxes as well. 
+For usage, most operations in the Problem class are driven by State. For example, to evaluate valid moves, we need both the wall positions and worker position, which are stored in the State object. Additionally, the Heuristics used to evaluate the priority of each case are based on State.
 
-A state represents a situation of the game. For example, if worker moves up and pushes the box A, it will return a new State rather than a Problem. 
-
-To use a State, rather than a new Problem, is for saving resources. Because not all fields will be modified during the simulation process, the storage of duplicate data would be wasted. in this project, only the boxes and worker position are movable, so only these two will be included in a state.
+Since a State only represents the current situation, there is no difference between the State of the box-driven model and the State of the worker-driven model.
 
 #### Heuristics
 
