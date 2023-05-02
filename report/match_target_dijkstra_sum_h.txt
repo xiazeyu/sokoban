@@ -24,7 +24,7 @@ Test 1 passed!  :-)
 <<  test_solve_weighted_sokoban >>
 case 0, ./warehouses/warehouse_01.txt
 A* Box Solver
-took 0.002090 seconds
+took 0.006083 seconds
 Answer as expected, wow!  :-)
 
 Cost as expected!  :-)
@@ -33,7 +33,7 @@ Final as expected!  :-)
 
 case 1, ./warehouses/warehouse_8a.txt
 A* Box Solver
-took 0.199867 seconds
+took 0.373330 seconds
 Steps are not the same, but don't worries!
 Cost as expected!  :-)
 
@@ -41,7 +41,7 @@ Final as expected!  :-)
 
 case 2, ./warehouses/warehouse_09.txt
 A* Box Solver
-took 0.001206 seconds
+took 0.002715 seconds
 Answer as expected, wow!  :-)
 
 Cost as expected!  :-)
@@ -50,7 +50,7 @@ Final as expected!  :-)
 
 case 3, ./warehouses/warehouse_47.txt
 A* Box Solver
-took 0.034795 seconds
+took 0.126727 seconds
 Answer as expected, wow!  :-)
 
 Cost as expected!  :-)
@@ -59,52 +59,14 @@ Final as expected!  :-)
 
 case 4, ./warehouses/warehouse_81.txt
 A* Box Solver
-took 0.115135 seconds
-Answer as expected, wow!  :-)
-
-Cost as expected!  :-)
-
+took 0.723668 seconds
+Steps are not the same, but don't worries!
+Your cost = 576, expected cost = 376
 Final as expected!  :-)
 
 case 5, ./warehouses/warehouse_5n.txt
 A* Box Solver
-took 0.197866 seconds
+took 7.070636 seconds
 Answer as expected, Impossible!  :-)
 
 case 6, ./warehouses/warehouse_07.txt
-A* Box Solver
-took 247.370104 seconds
-Steps are not the same, but don't worries!
-Cost as expected!  :-)
-
-unexpected answer!  :D
-
-Expected 
-['Up', 'Up', 'Right', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right', 'Up', 'Down', 'Right', 'Down', 'Down', 'Left', 'Up', 'Down', 'Left', 'Left', 'Up', 'Left', 'Up', 'Up', 'Right']
-But, received 
-['Right', 'Right', 'Up', 'Left', 'Up', 'Up', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Left', 'Left', 'Down', 'Down', 'Right', 'Up', 'Down', 'Right', 'Left', 'Left', 'Down', 'Down', 'Right', 'Up']
-Expected final 
-#######
-#     #
-# * * #
-# @*  #
-# * * #
-#  *  #
-#     #
-#######
-But, received final 
-#######
-#     #
-# * * #
-#  *  #
-# * * #
-# @*  #
-#     #
-#######
-case 7, ./warehouses/warehouse_147.txt
-A* Box Solver
-took 20.079494 seconds
-Steps are not the same, but don't worries!
-Cost as expected!  :-)
-
-Final as expected!  :-)

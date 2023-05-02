@@ -1,0 +1,67 @@
+Using submitted solver
+[(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 0!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 1!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 2!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 3!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 4!  :-)
+
+<<  check_elem_action_seq, test 0>>
+Test 0 passed!  :-)
+
+<<  check_elem_action_seq, test 1>>
+Test 1 passed!  :-)
+
+<<  test_solve_weighted_sokoban >>
+case 0, ./warehouses/warehouse_01.txt
+[[ 0.  0.  0.  0.  0.  0.  0.]
+ [ 0. nan  0.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.]
+ [ 0.  0.  0.  0.  0.  0.  0.]]
+Traceback (most recent call last):
+
+  File /opt/homebrew/Caskroom/miniconda/base/envs/cab320/lib/python3.11/site-packages/spyder_kernels/py3compat.py:356 in compat_exec
+    exec(code, globals, locals)
+
+  File ~/Documents/github.com/xiazeyu/sokoban/sanity_check.py:232
+    test_solve_weighted_sokoban()
+
+  File ~/Documents/github.com/xiazeyu/sokoban/sanity_check.py:192 in test_solve_weighted_sokoban
+    answer = solve_weighted_sokoban(wh)
+
+  File ~/Documents/github.com/xiazeyu/sokoban/mySokobanSolver.py:1026 in solve_weighted_sokoban
+    goal_node = search.astar_graph_search(problem)
+
+  File ~/Documents/github.com/xiazeyu/sokoban/search.py:470 in astar_graph_search
+    return best_first_graph_search(problem, lambda n: n.path_cost + h(n))
+
+  File ~/Documents/github.com/xiazeyu/sokoban/search.py:404 in best_first_graph_search
+    frontier.append(node)
+
+  File ~/Documents/github.com/xiazeyu/sokoban/search.py:127 in append
+    heapq.heappush(self.heap, (self.f(item), item))
+
+  File ~/Documents/github.com/xiazeyu/sokoban/search.py:470 in <lambda>
+    return best_first_graph_search(problem, lambda n: n.path_cost + h(n))
+
+  File ~/Documents/github.com/xiazeyu/sokoban/search.py:48 in memoized_fn
+    val = fn(obj, *args)
+
+  File ~/Documents/github.com/xiazeyu/sokoban/mySokobanSolver.py:804 in h
+    return self.match_target_hungarian_dijkstra_sum_h(node)
+
+  File ~/Documents/github.com/xiazeyu/sokoban/mySokobanSolver.py:781 in match_target_hungarian_dijkstra_sum_h
+    row_ind, col_ind=scipy.optimize.linear_sum_assignment(cost_matrix)
+
+ValueError: matrix contains invalid numeric entries
