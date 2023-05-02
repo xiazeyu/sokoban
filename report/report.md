@@ -9,13 +9,15 @@
 
 ### Design
 
-Designing an environment to run algorithms that solve Sokoban is a complex task that involves multiple steps. 
+Designing an environment to run algorithms that solve Sokoban is a complex task that involves multiple steps. The first step is to simulate the Sokoban gaming environment with a data structure that can represent the game board, the position of the boxes, and the player. Then, functions that represent the player's movements and validate actions for each state are created.
 
-The first step is to simulate the Sokoban gaming environment with a data structure that can represent the game board and the position of the boxes and the player. Then, the functions that represent operation from the gamer is be created such as validate actions for each case (state) or the result of taking an operation.
+Once the Sokoban environment is set up, the search algorithm can be used with the given structure in search.py. This structure includes methods and objects that handle what is contained in a Node, what edges a node can go to, and the strategy for exploring Nodes. These methods and objects are mostly used as provided, rather than being rebuilt.
 
-After the environment of Sokoban had been successfully set up, the search algorithm was ready to be used in the given structure. the given structure in search.py includes methods and objects that handle what is contained in a Node, what edges can a node go to, and the strategy of how Nodes be explored. This is complex but provided so we were mostly using, not rebuilding these methods and objects. 
+The last step is to determine the parameters that drive informed search algorithms, which are usually functions. By providing a fit function that correctly evaluates the priority, the optimized algorithm can balance between time efficiency and correctness.
 
-The last part of development is to figure out the parameter that drives informed search algorithms, which are usually functions. By providing a fit function that correctly evaluates the priority the optimised algorithm which has a balance between time efficiency and correctness will be activated.
+In this project, we provide two strategies for solving Sokoban. One is based on the cost of worker moves, and we can add heuristics to lower the priority of impassable or inefficient situations. The other is driven by box moves, iterating from box moves to find the lowest cost moves for the worker to push the box into the desired position. This approach takes advantage of the fact that box movements are usually simpler than worker movements, resulting in shorter running times and lower complexity.
+
+Both modes will be compared in further reports, but only one will be named SokobanPuzzle for grading purposes.
 
 
 #### State
