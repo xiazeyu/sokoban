@@ -224,6 +224,9 @@ None],
             print('Expected final ');print(expected_final)
             print('But, received final ');print(my_final)
 
+def test_solve_weighted_sokoban_speed():
+    pass
+
 if __name__ == "__main__":
     print(my_team())  # should print your team
 

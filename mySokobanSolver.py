@@ -807,7 +807,7 @@ class SokobanPuzzle(search.Problem):
             The heuristic value.
 
         """
-        return self.nearest_target_manhattan_sum_h(node)
+        return self.match_target_hungarian_dijkstra_sum_h(node)
 
 
 class SokobanPuzzleWorker(SokobanPuzzle):

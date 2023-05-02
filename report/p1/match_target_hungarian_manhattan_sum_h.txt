@@ -1,0 +1,110 @@
+Using submitted solver
+[(11262141, 'Tian-Ching', 'Lan'), (11398299, 'Zeyu', 'Xia')]
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 0!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 1!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 2!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 3!  :-)
+
+<<  Testing test_taboo_cells >>
+test_taboo_cells  passed for 4!  :-)
+
+<<  check_elem_action_seq, test 0>>
+Test 0 passed!  :-)
+
+<<  check_elem_action_seq, test 1>>
+Test 1 passed!  :-)
+
+<<  test_solve_weighted_sokoban >>
+case 0, ./warehouses/warehouse_01.txt
+A* Box Solver
+took 0.001879 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 1, ./warehouses/warehouse_8a.txt
+A* Box Solver
+took 0.096953 seconds
+Steps are not the same, but don't worries!
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 2, ./warehouses/warehouse_09.txt
+A* Box Solver
+took 0.000833 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 3, ./warehouses/warehouse_47.txt
+A* Box Solver
+took 0.030815 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 4, ./warehouses/warehouse_81.txt
+A* Box Solver
+took 0.092969 seconds
+Answer as expected, wow!  :-)
+
+Cost as expected!  :-)
+
+Final as expected!  :-)
+
+case 5, ./warehouses/warehouse_5n.txt
+A* Box Solver
+took 0.201347 seconds
+Answer as expected, Impossible!  :-)
+
+case 6, ./warehouses/warehouse_07.txt
+A* Box Solver
+took 250.419822 seconds
+Steps are not the same, but don't worries!
+Cost as expected!  :-)
+
+unexpected answer!  :D
+
+Expected
+['Up', 'Up', 'Right', 'Right', 'Up', 'Up', 'Left', 'Left', 'Down', 'Down', 'Right', 'Up', 'Down', 'Right', 'Down', 'Down', 'Left', 'Up', 'Down', 'Left', 'Left', 'Up', 'Left', 'Up', 'Up', 'Right']
+But, received
+['Left', 'Left', 'Up', 'Right', 'Up', 'Up', 'Left', 'Up', 'Up', 'Right', 'Right', 'Down', 'Right', 'Right', 'Down', 'Down', 'Left', 'Up', 'Down', 'Left', 'Right', 'Right', 'Down', 'Down', 'Left', 'Up']
+Expected final
+#######
+#     #
+# * * #
+# @*  #
+# * * #
+#  *  #
+#     #
+#######
+But, received final
+#######
+#     #
+# * * #
+#  *  #
+# * * #
+#  *@ #
+#     #
+#######
+case 7, ./warehouses/warehouse_147.txt
+A* Box Solver
+took 19.032189 seconds
+Steps are not the same, but don't worries!
+Cost as expected!  :-)
+
+Final as expected!  :-)
